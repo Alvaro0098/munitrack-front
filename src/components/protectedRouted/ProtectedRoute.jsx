@@ -1,21 +1,18 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
+import { getUserRole } from "../../services/authService.jsx"
 
-/**
- * ProtectedRoute
- *
- * Props:
- *  - isSignedIn: boolean que indica si el usuario está logueado
- *  - children: el componente que queremos proteger
- */
-const ProtectedRoute = ({ isSignedIn, children }) => {
-  // Si el usuario no está logueado, lo redirige al login
-  if (!isSignedIn) {
-    return <Navigate to="/login" replace />;
-  }
+ "lees" el valor y el warning desaparececonst ProtectedRoute = ({ children, allowedRoles }) => {
+    // Aquí es donde
+    const role = getUserRole(); 
 
-  // Si está logueado, renderiza el componente protegido
-  return children;
+    if (!role) return <Navigate to="/login" />;
+
+    // Lógica de niveles: ¿El rol del usuario está en la lista de permitidos?
+    if (!allowedRoles.includes(role)) {
+        return <Navigate to="/usernotfound" />;
+    }
+
+    return children;
 };
-
 export default ProtectedRoute;
