@@ -15,7 +15,7 @@ const RouterPrincipal = () => {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/operators" element={<CreateOperador />} />
-        <Route path="/citizens" element={<CreateCitizen />} />
+        <Route path="/citizens" element={<CreateCitizen/>} />
         <Route path="/incidence" element={<Incidence />} />
         <Route path="/UserNotFound" element={<UserNotFound />} />
         <Route path="/CitizenSearch" element={<CitizenSearch />} />

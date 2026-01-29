@@ -1,31 +1,37 @@
 import './TopBar.css'
 import { useNavigate } from "react-router-dom";
 
+import { getUserData, ROLES } from "../../services/authService.jsx";
+
+
 const TopBar = () => {
   const navigate = useNavigate();
+  const user = getUserData();
+
+  console.log("Payload del Token:", user)
+
+  const nombreCompleto = user ? `${user.given_name} ${user.family_name}` : "Invitado";
+  const role = user?.role || "Sin Rol";
 
   const handleLogOut = () => {
     navigate("/login");
   };
 
   const handleGoToRegisterCitizen = () => {
-    navigate("/citizens/new");
+    navigate("/citizens");
   };
 
   const handleGoToRegisterOperator = () => {
-    navigate("/operators/new");
+    navigate("/operators");
   };
   const handleGoToHome = () => {
     navigate("/CitizenSearch");
   };
   const handleGoToArea = () =>{
-navigate("/AreaDetails");
+    navigate("/AreaDetails");
   };
 
-  const operador = {
-    nombre: "Juan Perez",
-    nivel: "Operador Nivel 1"
-  };
+
 
   return (
     <nav className="navbar navbar-dark bg-dark" id="navbar">
@@ -36,19 +42,26 @@ navigate("/AreaDetails");
           <button className="nav-btn" onClick={handleGoToHome}>
             Home
           </button>
-          <button className="nav-btn" onClick={handleGoToArea}>Areas</button>
-          <button className="nav-btn" onClick={handleGoToRegisterOperator}>
-            Registrar Operador
-          </button>
-          <button className="nav-btn" onClick={handleGoToRegisterCitizen}>
-            Registrar Ciudadano
-          </button>
+          {(role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN) && (
+            <button className="nav-btn" onClick={handleGoToRegisterCitizen}>
+              Registrar Ciudadano
+            </button>
+          )}
+          {role === ROLES.SUPER_ADMIN && (
+            <button className="nav-btn" onClick={handleGoToRegisterOperator}>
+              Registrar Operador
+            </button>
+          )}
+          
+          {(role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN) && (
+            <button className="nav-btn" onClick={handleGoToArea}>Areas</button>
+          )}
         </div>
 
         <div className="d-flex align-items-center gap-3">
           <div className="text-end me-2">
-            <div className="fw-bold text-white">{operador.nombre}</div>
-            <div className="small text-white">{operador.nivel}</div>
+            <div className="fw-bold text-white">{nombreCompleto}</div>
+            <div className="small text-white">{role}</div>
           </div>
 
           <i className="bi bi-person-circle fs-3 text-white"></i>
