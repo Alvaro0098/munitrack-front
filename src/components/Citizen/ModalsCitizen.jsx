@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
+import {CreateCitizen} from "../../services/CitizenService"
 
 const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm }) => {
   const [formData, setFormData] = useState({
@@ -22,6 +23,39 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+const sendCitizen = async (e) => {
+    e.preventDefault();
+
+    if (!formData.nombre || !formData.dni) {
+      alert("Por favor, completa los campos obligatorios.");
+      return;
+    }
+
+    const dataForBack = {
+      Name: formData.nombre,
+      LastName: formData.apellido,
+      DNI: formData.dni,
+      Email: formData.mail,
+      Adress: formData.direccion,
+      Phone: formData.celular,
+    };
+
+    try {
+      if (mode === "create") {
+        const result = await CreateCitizen(dataForBack);
+        console.log("Ciudadano creado:", result);
+      } else if (mode === "edit") {
+       
+        console.log("Actualizando ciudadano...", dataForBack);
+      }
+      
+      onConfirm(); 
+    } catch (error) {
+      console.error("Error en la operación:", error);
+      alert(error.message || "Error al procesar la solicitud.");
+    }
   };
 
   const renderFormModal = () => (
@@ -67,7 +101,7 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm }) => {
       </Modal.Body>
       <Modal.Footer className="border-0">
         <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-        <Button variant="primary" onClick={() => onConfirm(formData)}>
+        <Button variant="primary" onClick={sendCitizen}>
           {mode === "create" ? "Guardar" : "Actualizar"}
         </Button>
       </Modal.Footer>

@@ -1,35 +1,29 @@
 import React, { useState, useEffect } from "react"; // Agregado useEffect
-import "../citizenDetails/CitizenStyles.css"; 
+import "./CitizenStyles.css";
 import TopBar from "../topBar/TopBar";
 import CitizenModals from "./ModalsCitizen";
+import {GetCitizens} from "../../services/CitizenService"
 
 const CitizenList = () => {
-  // Estados para datos y carga
-  const [ciudadanos, setCiudadanos] = useState([]);
+
+  const [citizens, setCitizens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalConfig, setModalConfig] = useState({ show: false, mode: null, data: null });
 
-  // Simulación de llamada al Backend
-  useEffect(() => {
-    const fetchCitizens = async () => {
-      setLoading(true);
-      try {
-        // MOCK: Simulación de red
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        const dataMock = [
-          { id: 1, nombre: "Ana", apellido: "Martínez", dni: "35.123.456", mail: "ana.mtz@gmail.com", direccion: "Av. Pellegrini 1234", celular: "3411234567" },
-          { id: 2, nombre: "Juan", apellido: "Pérez", dni: "30.987.654", mail: "juan.p@gmail.com", direccion: "Calle Falsa 123", celular: "3417654321" }
-        ];
+const cargarDatos = async () => {
+    setLoading(true); // Iniciamos carga
+    try {
+      const data = await GetCitizens(); 
+      setCitizens(data); 
+    } catch (error) {
+      console.error("Error cargando ciudadanos:", error);
+    } finally {
+      setLoading(false); // 1. IMPORTANTE: Apagamos el spinner siempre
+    }
+  };
 
-        setCiudadanos(dataMock);
-      } catch (error) {
-        console.error("Error al obtener ciudadanos:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCitizens();
+  useEffect(() => {
+    cargarDatos(); 
   }, []);
 
   const handleOpenModal = (mode, data = null) => {
@@ -50,6 +44,7 @@ const CitizenList = () => {
       setCiudadanos(ciudadanos.filter(c => c.id !== data));
     }
     handleCloseModal();
+    cargarDatos();
   };
 
   return (
@@ -80,14 +75,14 @@ const CitizenList = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {ciudadanos.map((c) => (
+                      {citizens.map((c) => (
                         <tr key={c.id}>
-                          <td>{c.nombre}</td>
-                          <td>{c.apellido}</td>
+                          <td>{c.name}</td>
+                          <td>{c.lastName}</td>
                           <td>{c.dni}</td>
-                          <td>{c.mail}</td>
-                          <td>{c.direccion}</td>
-                          <td>{c.celular}</td>
+                          <td>{c.email}</td>
+                          <td>{c.adress}</td>
+                          <td>{c.phone}</td>
                           <td className="text-center">
                             <div className="d-flex justify-content-center gap-2">
                               <button className="btn btn-outline-primary btn-sm" onClick={() => handleOpenModal("edit", c)}>
