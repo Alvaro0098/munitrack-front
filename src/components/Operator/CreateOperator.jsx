@@ -1,56 +1,89 @@
-import React, { useState } from "react";
-import "../citizenDetails/CitizenStyles.css"; 
+import React, { useState, useEffect } from "react";
 import TopBar from "../topBar/TopBar";
 import OperatorModals from "./ModalsOperator"; 
+import { GetOperators, DeleteOperator, CreateOperator, UpdateOperator } from "../../services/OperatorService"; // Agregamos Create
 
-// 1. Definimos el objeto hardcodeado fuera del componente
-const operadoresHardcoded = [
-  {
-    id: 1,
-    nombre: "Carlos",
-    apellido: "García",
-    dni: "12.345.678",
-    nroLegajo: "OP-4402",
-    mail: "carlos.garcia@muni.gob.ar",
-    celular: "3415889900",
-    cargo: "Operador"
-  }
-];
-
-// 2. Asignamos el valor por defecto en la entrada del componente
-const OperatorList = ({ operadores = operadoresHardcoded }) => {
+const OperatorList = () => {
+  const [operators, setOperators] = useState([]);
   const [modalConfig, setModalConfig] = useState({
     show: false,
     mode: null, 
     data: null  
   });
 
-  const handleOpenCreate = () => {
-    setModalConfig({ show: true, mode: "create", data: null });
-  };
-
-  const handleOpenEdit = (operador) => {
-    setModalConfig({ show: true, mode: "edit", data: operador });
-  };
-
-  const handleOpenDelete = (operador) => {
-    setModalConfig({ show: true, mode: "delete", data: operador });
-  };
-
-  const handleCloseModal = () => {
-    setModalConfig({ show: false, mode: null, data: null });
-  };
-
-  const handleConfirmAction = (formDataOrId) => {
-    if (modalConfig.mode === "create") {
-      console.log("Insertando en DB:", formDataOrId);
-    } else if (modalConfig.mode === "edit") {
-      console.log("Actualizando en DB ID:", modalConfig.data.id, "con datos:", formDataOrId);
-    } else if (modalConfig.mode === "delete") {
-      console.log("Eliminando de DB ID:", formDataOrId);
+  const cargarDatos = async () => {
+    try {
+      const data = await GetOperators(); 
+      setOperators(data); 
+    } catch (error) {
+      console.error("Error cargando operadores:", error);
     }
-    handleCloseModal();
   };
+
+  useEffect(() => {
+    cargarDatos(); 
+  }, []);
+
+  // ELIMINACIÓN DIRECTA (EL TACHITO)
+const handleDirectDelete = async (dni) => {
+  // LOG DE CONTROL: Si aquí ves "undefined", el problema es el mapeo de la tabla.
+  console.log("DNI recibido en la función:", dni);
+
+  if (!dni) {
+    alert("Error: El DNI es nulo o indefinido.");
+    return;
+  }
+
+  if (!window.confirm(`¿Eliminar operador DNI: ${dni}?`)) return;
+
+  try {
+    const exito = await DeleteOperator(dni); 
+    
+    if (exito) {
+      await cargarDatos(); 
+      console.log("Operación finalizada con éxito.");
+    }
+  } catch (error) {
+    console.error("Fallo en la petición DELETE:", error);
+    alert("Error al eliminar: " + error.message);
+  }
+};
+
+  const handleOpenCreate = () => setModalConfig({ show: true, mode: "create", data: null });
+  const handleOpenEdit = (operador) => setModalConfig({ show: true, mode: "edit", data: operador });
+  const handleCloseModal = () => setModalConfig({ show: false, mode: null, data: null });
+
+  // FUNCIÓN PARA CREAR / EDITAR DESDE EL MODAL
+  const handleConfirmAction = async (formData) => {
+  try {
+    if (modalConfig.mode === "create") {
+      // Mantenemos tu lógica de payload para Create
+      const createPayload = {
+        DNI: formData.dni,
+        Name: formData.nombre,
+        LastName: formData.apellido,
+        NLegajo: formData.nroLegajo,
+        Password: formData.password,
+        Phone: formData.celular,
+        Email: formData.mail,
+        Position: formData.cargo 
+      };
+      await CreateOperator(createPayload);
+      console.log("Creado");
+    } 
+    else if (modalConfig.mode === "edit") {
+      // LLAMADA AL NUEVO SERVICIO
+      await UpdateOperator(modalConfig.data.dni, formData);
+      console.log("Actualizado en DB DNI:", modalConfig.data.dni);
+    }
+
+    await cargarDatos(); 
+    handleCloseModal();
+
+  } catch (error) {
+    alert("Error: " + error.message); 
+  }
+};
 
   return (
     <>
@@ -59,7 +92,6 @@ const OperatorList = ({ operadores = operadoresHardcoded }) => {
         <div className="card shadow rounded bg-white">
           <div className="card-body">
             <h3 className="card-title mb-3">Lista de Operadores</h3>
-            
             <div className="table-responsive">
               <table className="table table-striped table-bordered mb-0">
                 <thead className="table-primary">
@@ -69,47 +101,40 @@ const OperatorList = ({ operadores = operadoresHardcoded }) => {
                     <th>DNI</th>
                     <th>N° de Legajo</th>
                     <th>Mail</th>
-                    <th>Celular</th>
                     <th>Cargo</th>
                     <th className="text-center">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Ahora 'operadores' siempre tendrá al menos el valor de Carlos */}
-                  {operadores?.map((operador) => (
-                    <tr key={operador.id}>
-                      <td>{operador.nombre}</td>
-                      <td>{operador.apellido}</td>
+                  {operators?.map((operador) => (
+                    <tr key={operador.dni}> 
+                      <td>{operador.name}</td>
+                      <td>{operador.lastName}</td>
                       <td>{operador.dni}</td>
-                      <td>{operador.nroLegajo}</td>
-                      <td>{operador.mail}</td>
-                      <td>{operador.celular}</td>
+                      <td>{operador.nLegajo}</td>
+                      <td>{operador.email}</td>
                       <td>
-                        <span className="badge bg-info text-dark">
-                          {operador.cargo}
-                        </span>
+                        <span className="badge bg-info text-dark">{operador.position}</span>
                       </td>
                       <td className="text-center">
                         <div className="d-flex justify-content-center gap-2">
                           <button 
                             className="btn btn-outline-primary btn-sm" 
                             onClick={() => handleOpenEdit(operador)}
-                            title="Editar Operador"
                           >
                             <i className="bi bi-pencil-square"></i>
                           </button>
                           
-                          <button 
-                            className="btn btn-outline-danger btn-sm" 
-                            onClick={() => handleOpenDelete(operador)}
-                            title="Eliminar Operador"
-                          >
-                            <i className="bi bi-trash3-fill"></i>
-                          </button>
+                <button 
+  className="btn btn-outline-danger btn-sm" 
+  onClick={() => handleDirectDelete(operador.dni)} // Referencia directa
+>
+  <i className="bi bi-trash3-fill"></i>
+</button>
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  ))}   
                 </tbody>
               </table>
             </div>
@@ -117,11 +142,7 @@ const OperatorList = ({ operadores = operadoresHardcoded }) => {
         </div>
 
         <div className="d-flex justify-content-end mt-3 mb-3">
-          <button 
-            className="btn btn-success" 
-            id="styleButton" 
-            onClick={handleOpenCreate}
-          >
+          <button className="btn btn-success" id="styleButton" onClick={handleOpenCreate}>
             <i className="bi bi-person-plus-fill me-2"></i> Registrar Operador
           </button>
         </div>
@@ -132,7 +153,7 @@ const OperatorList = ({ operadores = operadoresHardcoded }) => {
         mode={modalConfig.mode}
         operatorData={modalConfig.data}
         onClose={handleCloseModal}
-        onConfirm={handleConfirmAction}
+        onConfirm={handleConfirmAction} 
       />
     </>
   );
