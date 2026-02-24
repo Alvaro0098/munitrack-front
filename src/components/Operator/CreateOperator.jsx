@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import TopBar from "../topBar/TopBar";
 import OperatorModals from "./ModalsOperator"; 
-// Importamos ROLES para no usar strings "hardcodeados" y evitar errores de dedo
 import { ROLES } from "../../services/AuthService.jsx"; 
 import { GetOperators, DeleteOperator, CreateOperator, UpdateOperator } from "../../services/OperatorService";
 
