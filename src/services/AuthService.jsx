@@ -28,7 +28,7 @@ export const loginService = async ({ nLegajo, password }) => {
                 nombre: decoded.given_name || "Usuario", 
                 apellido: decoded.family_name || "",
                 legajo: nLegajo, // Este viene del parámetro de la función
-                rol: decoded.role 
+                rol: Number(decoded.role)
             }));
         }
     }
