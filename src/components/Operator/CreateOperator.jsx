@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import TopBar from "../topBar/TopBar";
 import OperatorModals from "./ModalsOperator"; 
-import { GetOperators, DeleteOperator, CreateOperator, UpdateOperator } from "../../services/OperatorService"; // Agregamos Create
+// Importamos ROLES para no usar strings "hardcodeados" y evitar errores de dedo
+import { ROLES } from "../../services/AuthService.jsx"; 
+import { GetOperators, DeleteOperator, CreateOperator, UpdateOperator } from "../../services/OperatorService";
 
 const OperatorList = () => {
   const [operators, setOperators] = useState([]);
+  // Obtenemos el rol guardado en el login
+  const currentRole = localStorage.getItem("userRole"); 
+  
   const [modalConfig, setModalConfig] = useState({
     show: false,
     mode: null, 
@@ -24,66 +29,52 @@ const OperatorList = () => {
     cargarDatos(); 
   }, []);
 
-  // ELIMINACIÓN DIRECTA (EL TACHITO)
-const handleDirectDelete = async (dni) => {
-  // LOG DE CONTROL: Si aquí ves "undefined", el problema es el mapeo de la tabla.
-  console.log("DNI recibido en la función:", dni);
-
-  if (!dni) {
-    alert("Error: El DNI es nulo o indefinido.");
-    return;
-  }
-
-  if (!window.confirm(`¿Eliminar operador DNI: ${dni}?`)) return;
-
-  try {
-    const exito = await DeleteOperator(dni); 
-    
-    if (exito) {
-      await cargarDatos(); 
-      console.log("Operación finalizada con éxito.");
+  const handleDirectDelete = async (dni) => {
+    if (!dni) {
+      alert("Error: El DNI es nulo o indefinido.");
+      return;
     }
-  } catch (error) {
-    console.error("Fallo en la petición DELETE:", error);
-    alert("Error al eliminar: " + error.message);
-  }
-};
+    if (!window.confirm(`¿Eliminar operador DNI: ${dni}?`)) return;
+
+    try {
+      const exito = await DeleteOperator(dni); 
+      if (exito) {
+        await cargarDatos(); 
+      }
+    } catch (error) {
+      // Aquí capturamos el 403 si el usuario saltó el bloqueo visual
+      alert(error.status === 403 ? "No tiene permisos para eliminar" : "Error al eliminar: " + error.message);
+    }
+  };
 
   const handleOpenCreate = () => setModalConfig({ show: true, mode: "create", data: null });
   const handleOpenEdit = (operador) => setModalConfig({ show: true, mode: "edit", data: operador });
   const handleCloseModal = () => setModalConfig({ show: false, mode: null, data: null });
 
-  // FUNCIÓN PARA CREAR / EDITAR DESDE EL MODAL
   const handleConfirmAction = async (formData) => {
-  try {
-    if (modalConfig.mode === "create") {
-      // Mantenemos tu lógica de payload para Create
-      const createPayload = {
-        DNI: formData.dni,
-        Name: formData.nombre,
-        LastName: formData.apellido,
-        NLegajo: formData.nroLegajo,
-        Password: formData.password,
-        Phone: formData.celular,
-        Email: formData.mail,
-        Position: formData.cargo 
-      };
-      await CreateOperator(createPayload);
-      console.log("Creado");
-    } 
-    else if (modalConfig.mode === "edit") {
-      // LLAMADA AL NUEVO SERVICIO
-      await UpdateOperator(modalConfig.data.dni, formData);
-      console.log("Actualizado en DB DNI:", modalConfig.data.dni);
+    try {
+      if (modalConfig.mode === "create") {
+        const createPayload = {
+          DNI: formData.dni,
+          Name: formData.nombre,
+          LastName: formData.apellido,
+          NLegajo: formData.nroLegajo,
+          Password: formData.password,
+          Phone: formData.celular,
+          Email: formData.mail,
+          Position: formData.cargo 
+        };
+        await CreateOperator(createPayload);
+      } 
+      else if (modalConfig.mode === "edit") {
+        await UpdateOperator(modalConfig.data.dni, formData);
+      }
+      await cargarDatos(); 
+      handleCloseModal();
+    } catch (error) {
+      alert(error.status === 403 ? "Acceso denegado por el servidor" : "Error: " + error.message); 
     }
-
-    await cargarDatos(); 
-    handleCloseModal();
-
-  } catch (error) {
-    alert("Error: " + error.message); 
-  }
-};
+  };
 
   return (
     <>
@@ -102,7 +93,8 @@ const handleDirectDelete = async (dni) => {
                     <th>N° de Legajo</th>
                     <th>Mail</th>
                     <th>Cargo</th>
-                    <th className="text-center">Acciones</th>
+                    {/* Solo mostramos la columna 'Acciones' si es SysAdmin */}
+                    {currentRole === ROLES.SUPER_ADMIN && <th className="text-center">Acciones</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -116,23 +108,28 @@ const handleDirectDelete = async (dni) => {
                       <td>
                         <span className="badge bg-info text-dark">{operador.position}</span>
                       </td>
-                      <td className="text-center">
-                        <div className="d-flex justify-content-center gap-2">
-                          <button 
-                            className="btn btn-outline-primary btn-sm" 
-                            onClick={() => handleOpenEdit(operador)}
-                          >
-                            <i className="bi bi-pencil-square"></i>
-                          </button>
-                          
-                <button 
-  className="btn btn-outline-danger btn-sm" 
-  onClick={() => handleDirectDelete(operador.dni)} // Referencia directa
->
-  <i className="bi bi-trash3-fill"></i>
-</button>
-                        </div>
-                      </td>
+                      
+                      {/* FILTRO DE ACCIONES EN LA FILA */}
+                      {currentRole === ROLES.SUPER_ADMIN && (
+                        <td className="text-center">
+                          <div className="d-flex justify-content-center gap-2">
+                            <button 
+                              className="btn btn-outline-primary btn-sm" 
+                              onClick={() => handleOpenEdit(operador)}
+                              title="Editar"
+                            >
+                              <i className="bi bi-pencil-square"></i>
+                            </button>
+                            <button 
+                              className="btn btn-outline-danger btn-sm" 
+                              onClick={() => handleDirectDelete(operador.dni)}
+                              title="Eliminar"
+                            >
+                              <i className="bi bi-trash3-fill"></i>
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}   
                 </tbody>
@@ -141,11 +138,14 @@ const handleDirectDelete = async (dni) => {
           </div>
         </div>
 
-        <div className="d-flex justify-content-end mt-3 mb-3">
-          <button className="btn btn-success" id="styleButton" onClick={handleOpenCreate}>
-            <i className="bi bi-person-plus-fill me-2"></i> Registrar Operador
-          </button>
-        </div>
+        {/* FILTRO PARA EL BOTÓN DE REGISTRO */}
+        {currentRole === ROLES.SUPER_ADMIN && (
+          <div className="d-flex justify-content-end mt-3 mb-3">
+            <button className="btn btn-success" id="styleButton" onClick={handleOpenCreate}>
+              <i className="bi bi-person-plus-fill me-2"></i> Registrar Operador
+            </button>
+          </div>
+        )}
       </div>
 
       <OperatorModals 
