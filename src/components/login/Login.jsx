@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, FormGroup } from "react-bootstrap";
-import { loginService } from "../../services/authService.jsx";
+import { loginService } from "../../services/AuthService.jsx";
 import "./Login.css";
 
 const Login = () => {

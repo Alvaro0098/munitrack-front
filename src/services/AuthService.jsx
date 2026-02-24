@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5216/api/Authentication";
+const API_URL = "https://munitrack-a3gcd3gqctffeeb0.eastus-01.azurewebsites.net/api/Authentication";
 
 // 1. Definimos los 3 roles de la consigna para usarlos en toda la app
 export const ROLES = {

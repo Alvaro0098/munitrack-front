@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5216";
+const API_URL = "https://munitrack-a3gcd3gqctffeeb0.eastus-01.azurewebsites.net";
 
 export const CreateArea = async (areaData) => { 
     const token = localStorage.getItem("token");
