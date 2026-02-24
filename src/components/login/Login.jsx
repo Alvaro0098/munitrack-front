@@ -30,7 +30,7 @@ const Login = () => {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.keys(newErrors).length === 0; // retorna true si el objeto newErrors es = 0
   };
 
   const handleSubmit = async (event) => {
