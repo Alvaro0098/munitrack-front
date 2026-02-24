@@ -3,11 +3,16 @@ import "./AreaDetails.css";
 import TopBar from "../topBar/TopBar";
 import ModalsArea from "./ModalsArea"; 
 import { GetAreas } from "../../services/AreaService";
+// Importamos ROLES para mantener la arquitectura limpia
+import { ROLES } from "../../services/AuthService.jsx";
 
 const AreaList = () => {
   const [areas, setAreas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalConfig, setModalConfig] = useState({ show: false, mode: null, data: null });
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const currentRole = Number(userData?.rol); 
+  const canAccessActions = currentRole === ROLES.SUPER_ADMIN || currentRole === ROLES.ADMIN;
 
   const cargarDatos = async () => {
     setLoading(true);
@@ -53,38 +58,50 @@ const AreaList = () => {
                     <th style={{ width: "100px" }}>ID</th>
                     <th>Nombre de la Dependencia</th>
                     <th>Descripción / Función</th>
-                    <th className="text-center">Acciones</th>
+                    {canAccessActions && <th className="text-center">Acciones</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan="4" className="text-center py-4">Cargando datos...</td></tr>
+                    <tr>
+                      <td colSpan={canAccessActions ? "4" : "3"} className="text-center py-4">
+                        Cargando datos...
+                      </td>
+                    </tr>
                   ) : areas.length > 0 ? (
                     areas.map((area) => (
                       <tr key={area.id}>
                         <td>{area.id}</td>
                         <td className="fw-bold">{area.name}</td>
                         <td>{area.description || "Sin descripción disponible"}</td>
-                        <td className="text-center">
-                          <div className="d-flex justify-content-center gap-2">
-                            <button 
-                              className="btn btn-outline-primary btn-sm" 
-                              onClick={() => handleOpenModal("edit", area)}
-                            >
-                              <i className="bi bi-pencil-square"></i>
-                            </button>
-                            <button 
-                              className="btn btn-outline-danger btn-sm" 
-                              onClick={() => handleOpenModal("delete", area)}
-                            >
-                              <i className="bi bi-trash3-fill"></i>
-                            </button>
-                          </div>
-                        </td>
+                        {canAccessActions && (
+                          <td className="text-center">
+                            <div className="d-flex justify-content-center gap-2">
+                              <button 
+                                className="btn btn-outline-primary btn-sm" 
+                                onClick={() => handleOpenModal("edit", area)}
+                                title="Editar"
+                              >
+                                <i className="bi bi-pencil-square"></i>
+                              </button>
+                              <button 
+                                className="btn btn-outline-danger btn-sm" 
+                                onClick={() => handleOpenModal("delete", area)}
+                                title="Eliminar"
+                              >
+                                <i className="bi bi-trash3-fill"></i>
+                              </button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))
                   ) : (
-                    <tr><td colSpan="4" className="text-center py-4">No se encontraron áreas registradas.</td></tr>
+                    <tr>
+                      <td colSpan={canAccessActions ? "4" : "3"} className="text-center py-4">
+                        No se encontraron áreas registradas.
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>
@@ -92,15 +109,17 @@ const AreaList = () => {
           </div>
         </div>
 
-        <div className="d-flex justify-content-end mt-4">
-          <button 
-            className="btn btn-primary btn-lg shadow" 
-            id="button-register"
-            onClick={() => handleOpenModal("create")}
-          >
-            <i className="bi bi-plus-circle me-2"></i> Registrar Nueva Área
-          </button>
-        </div>
+        {canAccessActions && (
+          <div className="d-flex justify-content-end mt-4">
+            <button 
+              className="btn btn-primary btn-lg shadow" 
+              id="button-register"
+              onClick={() => handleOpenModal("create")}
+            >
+              <i className="bi bi-plus-circle me-2"></i> Registrar Nueva Área
+            </button>
+          </div>
+        )}
       </div>
 
       <ModalsArea 
