@@ -1,4 +1,5 @@
 const API_URL = "https://munitrack-a3gcd3gqctffeeb0.eastus-01.azurewebsites.net";
+const OPERATOR_URL = API_URL;
 
 export const CreateOperator = async (operatorData) => { 
     const token = localStorage.getItem("token");
