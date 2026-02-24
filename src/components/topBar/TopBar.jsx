@@ -1,7 +1,7 @@
 import './TopBar.css'
 import { useNavigate } from "react-router-dom";
 
-import { getUserData, ROLES } from "../../services/authService.jsx";
+import { getUserData, ROLES } from "../../services/AuthService.jsx";
 
 
 const TopBar = () => {
