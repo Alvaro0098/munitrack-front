@@ -1,10 +1,9 @@
 const API_URL = "https://munitrack-a3gcd3gqctffeeb0.eastus-01.azurewebsites.net/api/Authentication";
 
-// 1. Definimos los 3 roles de la consigna para usarlos en toda la app
 export const ROLES = {
-    SUPER_ADMIN: "SysAdmin",
-    ADMIN: "Admin",
-    USER: "OperatorBasic" // o "UsuarioComun", según tu back
+    SUPER_ADMIN: 2, 
+    ADMIN: 1,       
+    USER: 0         
 };
 
 export const loginService = async ({ nLegajo, password }) => { 

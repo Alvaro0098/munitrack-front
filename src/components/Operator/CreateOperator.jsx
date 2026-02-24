@@ -7,8 +7,8 @@ import { GetOperators, DeleteOperator, CreateOperator, UpdateOperator } from "..
 
 const OperatorList = () => {
   const [operators, setOperators] = useState([]);
-  // Obtenemos el rol guardado en el login
-  const currentRole = localStorage.getItem("userRole"); 
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const currentRole = Number(userData?.rol); // Forzamos a que sea número
   
   const [modalConfig, setModalConfig] = useState({
     show: false,
