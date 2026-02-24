@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import TopBar from "../topBar/TopBar";
 import OperatorModals from "./ModalsOperator"; 
-import { ROLES } from "../../services/AuthService.jsx"; 
 import { GetOperators, DeleteOperator, CreateOperator, UpdateOperator } from "../../services/OperatorService";
 
 const OperatorList = () => {
   const [operators, setOperators] = useState([]);
-  const userData = JSON.parse(localStorage.getItem("user"));
-  const currentRole = Number(userData?.rol); // Forzamos a que sea número
   
   const [modalConfig, setModalConfig] = useState({
     show: false,
@@ -36,13 +33,13 @@ const OperatorList = () => {
     if (!window.confirm(`¿Eliminar operador DNI: ${dni}?`)) return;
 
     try {
-      const exito = await DeleteOperator(dni); 
-      if (exito) {
-        await cargarDatos(); 
-      }
+      await DeleteOperator(dni); 
+      await cargarDatos(); 
     } catch (error) {
-      // Aquí capturamos el 403 si el usuario saltó el bloqueo visual
-      alert(error.status === 403 ? "No tiene permisos para eliminar" : "Error al eliminar: " + error.message);
+      // Mantenemos esto: si el Back devuelve 403, el usuario se entera aquí
+      alert(error.status === 403 
+        ? "Acceso Denegado: Su rol no tiene permisos para eliminar operadores." 
+        : "Error al eliminar: " + error.message);
     }
   };
 
@@ -71,7 +68,9 @@ const OperatorList = () => {
       await cargarDatos(); 
       handleCloseModal();
     } catch (error) {
-      alert(error.status === 403 ? "Acceso denegado por el servidor" : "Error: " + error.message); 
+      alert(error.status === 403 
+        ? "Acceso Denegado: No tiene permisos para realizar esta operación." 
+        : "Error: " + error.message); 
     }
   };
 
@@ -92,8 +91,7 @@ const OperatorList = () => {
                     <th>N° de Legajo</th>
                     <th>Mail</th>
                     <th>Cargo</th>
-                    {/* Solo mostramos la columna 'Acciones' si es SysAdmin */}
-                    {currentRole === ROLES.SUPER_ADMIN && <th className="text-center">Acciones</th>}
+                    <th className="text-center">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -107,28 +105,24 @@ const OperatorList = () => {
                       <td>
                         <span className="badge bg-info text-dark">{operador.position}</span>
                       </td>
-                      
-                      {/* FILTRO DE ACCIONES EN LA FILA */}
-                      {currentRole === ROLES.SUPER_ADMIN && (
-                        <td className="text-center">
-                          <div className="d-flex justify-content-center gap-2">
-                            <button 
-                              className="btn btn-outline-primary btn-sm" 
-                              onClick={() => handleOpenEdit(operador)}
-                              title="Editar"
-                            >
-                              <i className="bi bi-pencil-square"></i>
-                            </button>
-                            <button 
-                              className="btn btn-outline-danger btn-sm" 
-                              onClick={() => handleDirectDelete(operador.dni)}
-                              title="Eliminar"
-                            >
-                              <i className="bi bi-trash3-fill"></i>
-                            </button>
-                          </div>
-                        </td>
-                      )}
+                      <td className="text-center">
+                        <div className="d-flex justify-content-center gap-2">
+                          <button 
+                            className="btn btn-outline-primary btn-sm" 
+                            onClick={() => handleOpenEdit(operador)}
+                            title="Editar"
+                          >
+                            <i className="bi bi-pencil-square"></i>
+                          </button>
+                          <button 
+                            className="btn btn-outline-danger btn-sm" 
+                            onClick={() => handleDirectDelete(operador.dni)}
+                            title="Eliminar"
+                          >
+                            <i className="bi bi-trash3-fill"></i>
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}   
                 </tbody>
@@ -137,14 +131,11 @@ const OperatorList = () => {
           </div>
         </div>
 
-        {/* FILTRO PARA EL BOTÓN DE REGISTRO */}
-        {currentRole === ROLES.SUPER_ADMIN && (
-          <div className="d-flex justify-content-end mt-3 mb-3">
-            <button className="btn btn-success" id="styleButton" onClick={handleOpenCreate}>
-              <i className="bi bi-person-plus-fill me-2"></i> Registrar Operador
-            </button>
-          </div>
-        )}
+        <div className="d-flex justify-content-end mt-3 mb-3">
+          <button className="btn btn-success" id="styleButton" onClick={handleOpenCreate}>
+            <i className="bi bi-person-plus-fill me-2"></i> Registrar Operador
+          </button>
+        </div>
       </div>
 
       <OperatorModals 
