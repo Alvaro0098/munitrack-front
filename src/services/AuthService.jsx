@@ -23,12 +23,13 @@ export const loginService = async ({ nLegajo, password }) => {
         const decoded = getUserData(); 
         
         if (decoded) {
-            // 3. Guardamos un objeto 'user' con datos que SI existen en el token
+            const rawRole = decoded.role || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
             localStorage.setItem("user", JSON.stringify({ 
                 nombre: decoded.given_name || "Usuario", 
                 apellido: decoded.family_name || "",
                 legajo: nLegajo, // Este viene del parámetro de la función
-                rol: Number(decoded.role)
+                rol: Number(rawRole)
             }));
         }
     }
