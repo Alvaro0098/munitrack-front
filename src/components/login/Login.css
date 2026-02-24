@@ -13,13 +13,6 @@
   }
 }
 
-#buttonLogin:hover {
-  background-color: #08a18e;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
 #link-style {
   background: none;
   border: none;

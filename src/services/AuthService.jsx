@@ -21,10 +21,17 @@ export const loginService = async ({ nLegajo, password }) => {
     if (data) {
         
         localStorage.setItem("token", data);
-        localStorage.setItem("user", JSON.stringify({ 
-            nombre: data.nombre, 
-            legajo: nLegajo 
-        }));
+        const decoded = getUserData(); 
+        
+        if (decoded) {
+            // 3. Guardamos un objeto 'user' con datos que SI existen en el token
+            localStorage.setItem("user", JSON.stringify({ 
+                nombre: decoded.given_name || "Usuario", 
+                apellido: decoded.family_name || "",
+                legajo: nLegajo, // Este viene del parámetro de la función
+                rol: decoded.role 
+            }));
+        }
     }
     
     return data; 
