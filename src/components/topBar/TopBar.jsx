@@ -18,8 +18,9 @@ const TopBar = () => {
 
   const handleGoToRegisterCitizen = () => navigate("/citizens");
   const handleGoToRegisterOperator = () => navigate("/operators");
-  const handleGoToHome = () => navigate("/CitizenSearch");
+  const handleGoToIncidence = () => navigate("/incidence");
   const handleGoToArea = () => navigate("/AreaDetails");
+
 
   return (
     <nav className="navbar navbar-dark bg-dark" id="navbar">
@@ -28,8 +29,8 @@ const TopBar = () => {
         <div className="d-flex align-items-center gap-4">
           <span className="navbar-brand mb-0 h1">MuniTrack</span>
           
-          <button className="nav-btn" onClick={handleGoToHome}>
-            Home
+          <button className="nav-btn" onClick={handleGoToIncidence}>
+            Incidencias
           </button>
           
           <button className="nav-btn" onClick={handleGoToRegisterCitizen}>
