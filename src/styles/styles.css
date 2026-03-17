@@ -1,0 +1,108 @@
+/* --- Variables y Reset (Opcional pero recomendado) --- */
+:root {
+  --primary-blue: #428bc4;
+  --primary-teal: #0db4a1;
+  --dark-teal: #08a18e;
+  --warning-orange: #c77810;
+  --text-dark: #212529;
+}
+
+/* --- Fondos Globales --- */
+.main-bg-overlay {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/src/assets/fd8.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.main-bg-clean {
+  background-image: url('/src/assets/fd7.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+
+/* --- Componentes de Formulario (Login) --- */
+.auth-container {
+  background-color: var(--primary-blue);
+  min-height: 100vh;
+}
+
+.form-card-custom {
+  width: 30%;
+  background: white;
+  padding: 3rem;
+  border-radius: 0.5rem;
+}
+
+@media screen and (max-width: 1000px) { .form-card-custom { width: 45%; } }
+@media screen and (max-width: 700px) { .form-card-custom { width: 85%; } }
+
+/* --- Botones del Sistema --- */
+/* Reemplazamos los IDs genéricos por clases de utilidad */
+.btn-action-blue {
+  background-color: var(--primary-blue) !important;
+  border-color: var(--primary-blue);
+  color: white;
+  font-weight: 600;
+}
+
+.btn-action-teal {
+  background-color: var(--primary-teal) !important;
+  border-color: var(--primary-teal);
+  color: white;
+}
+
+.btn-action-orange {
+  background-color: var(--warning-orange) !important;
+  border-color: var(--warning-orange);
+  color: white;
+}
+
+/* --- Tablas y Cards --- */
+.table td, .table th {
+  color: var(--text-dark) !important;
+  vertical-align: middle;
+}
+
+.custom-card-title {
+  color: var(--text-dark) !important;
+}
+
+/* --- Navbar (TopBar) --- */
+.custom-navbar {
+  background-color: var(--primary-blue) !important;
+}
+
+.nav-link-custom {
+  background: none;
+  border: none;
+  color: white;
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-link-custom:hover {
+  color: var(--primary-teal);
+  transform: scale(0.95);
+}
+
+.nav-btn {
+  background: none;       
+  border: none;        
+  color: white;        
+  font-size: 1rem;        
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-btn:hover {
+  color: #0DB4A1;
+  transform: scale(0.9);
+  font-weight: bold;
+  transform-origin: center;
+}
