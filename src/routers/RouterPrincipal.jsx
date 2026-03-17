@@ -7,6 +7,7 @@ import UserNotFound from "../components/usernotfound/UserNotFound";
 import CitizenSearch from "../components/Citizen/CitizenSearch";
 import ForgotPassword from "../components/forgotPassword/ForgotPassword";
 import AreaDetails from "../components/areaDetails/AreaDetails";
+import ProtectedRoute from "../protectedRouted/ProtectedRoute";
 
 const RouterPrincipal = () => {
   return (
@@ -14,13 +15,15 @@ const RouterPrincipal = () => {
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/operators" element={<CreateOperador />} />
-        <Route path="/citizens" element={<CreateCitizen/>} />
-        <Route path="/incidence" element={<Incidence />} />
-        <Route path="/UserNotFound" element={<UserNotFound />} />
-        <Route path="/CitizenSearch" element={<CitizenSearch />} />
-        <Route path="/ForgotPassword" element={<ForgotPassword />}/>
-        <Route path="/AreaDetails" element={<AreaDetails/>}/>
+        <Route element={<ProtectedRoute />}> 
+          <Route path="/operators" element={<CreateOperador />} />
+          <Route path="/citizens" element={<CreateCitizen/>} />
+          <Route path="/incidence" element={<Incidence />} />
+          <Route path="/UserNotFound" element={<UserNotFound />} />
+          <Route path="/CitizenSearch" element={<CitizenSearch />} />
+          <Route path="/ForgotPassword" element={<ForgotPassword />}/>
+          <Route path="/AreaDetails" element={<AreaDetails/>}/>
+        </Route>
       </Routes>
     </BrowserRouter>
   );
