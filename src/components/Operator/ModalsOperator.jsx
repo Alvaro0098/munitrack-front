@@ -1,190 +1,185 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { CreateOperator } from "../../services/OperatorService";
+import { useForm } from "../../hooks/useForm";
 
-// 1. AGREGAMOS 'mode' y 'operatorData' A LAS PROPS
+
+
 const OperatorModals = ({ show, mode, operatorData, onClose, onConfirm }) => {
-  const initialState = {
-    nombre: "",
-    apellido: "",
-    dni: "",
-    nroLegajo: "",
-    mail: "",
-    celular: "",
-    cargo: "",
-    password: ""
+  
+
+  const validateOperator = (values) => {
+    const errors = {};
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+    // (Máximo 8 números) 
+    if (!values.DNI) {
+      errors.DNI = "El DNI es obligatorio.";
+    } else if (values.DNI.toString().length > 8) {
+      errors.DNI = "El DNI no puede superar los 8 dígitos.";
+    }
+
+    // (Mínimo 4 números) 
+    if (!values.NLegajo) {
+      errors.NLegajo = "El N° de Legajo es obligatorio.";
+    } else if (values.NLegajo.toString().length < 4) {
+      errors.NLegajo = "El legajo debe tener al menos 4 números.";
+    }
+
+    // (Min 8 caracteres, Mayús, Minús y Número) 
+    if (mode === "create" && !passwordRegex.test(values.Password)) {
+      errors.Password = "Mínimo 8 caracteres, incluyendo una mayúscula, una minúscula y un número.";
+    }
+
+    // (Máximo 8 números) 
+    if (values.Phone && values.Phone.length > 8) {
+      errors.Phone = "El celular no puede tener más de 8 dígitos.";
+    }
+
+    // mayuscula, minuscula, numero, minimo 8 caracteres
+    if (!values.Email) {
+      errors.Email = "El correo es obligatorio.";
+    } else if (!/\S+@\S+\.\S+/.test(values.Email)) {
+      errors.Email = "El formato de email es inválido.";
+    }
+
+    if (!values.Name) errors.Name = "El nombre es obligatorio.";
+    if (!values.LastName) errors.LastName = "El apellido es obligatorio.";
+
+    return errors;
   };
 
-  const [formData, setFormData] = useState(initialState);
-  const [errors, setErrors] = useState({});
+  const { formData, setFormData, errors, handleChange, handleSubmit } = useForm({
+    DNI: "",
+    Name: "",
+    LastName: "",
+    NLegajo: "",
+    Password: "",
+    Phone: "",
+    Email: "",
+    position: "0", 
+  },  validateOperator);
 
-  // 2. EFECTO PARA CARGAR DATOS SI ES EDICIÓN
   useEffect(() => {
     if (show) {
       if (mode === "edit" && operatorData) {
-        // Mapeamos lo que viene de la DB (minúsculas) a tus nombres de estado
+        // Mapeamos los datos del backend a los nombres de nuestro formulario
         setFormData({
-          nombre: operatorData.name || "",
-          apellido: operatorData.lastName || "",
-          dni: operatorData.dni || "",
-          nroLegajo: operatorData.nLegajo || "",
-          mail: operatorData.email || "",
-          celular: operatorData.phone || "",
-          cargo: operatorData.position || "",
-          password: "" // Contraseña vacía por seguridad en edición
+          DNI: operatorData.dni || "",
+          Name: operatorData.name || "",
+          LastName: operatorData.lastName || "",
+          NLegajo: operatorData.nLegajo || "",
+          Password: "", 
+          Phone: operatorData.phone || "",
+          Email: operatorData.email || "",
+          position: operatorData.position.toString() || "0"
         });
       } else {
-        setFormData(initialState);
+        
+        setFormData({
+       DNI: "", Name: "", LastName: "", NLegajo: "", 
+        Password: "", Phone: "", Email: "", position: "0"
+      });
       }
-      setErrors({});
     }
-  }, [show, mode, operatorData]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.nombre.trim()) newErrors.nombre = "Nombre requerido.";
-    if (!formData.apellido.trim()) newErrors.apellido = "Apellido requerido.";
-    if (!formData.dni) newErrors.dni = "DNI requerido.";
-    else if (isNaN(formData.dni)) newErrors.dni = "Ingrese solo números.";
-    if (!formData.nroLegajo) newErrors.nroLegajo = "Legajo requerido.";
-    else if (isNaN(formData.nroLegajo)) newErrors.nroLegajo = "Ingrese solo números.";
-    
-    // Al editar, la contraseña puede ser opcional si no se quiere cambiar
-    if (mode === "create") {
-      if (!formData.password) newErrors.password = "Contraseña requerida.";
-      else if (formData.password.length < 8) newErrors.password = "Mínimo 8 caracteres.";
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.mail) newErrors.mail = "Email requerido.";
-    else if (!emailRegex.test(formData.mail)) newErrors.mail = "Email no válido.";
-
-    if (!formData.cargo) newErrors.cargo = "Seleccione un cargo.";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-    
-    // Simplemente pasamos el formData al padre, él decidirá si crear o editar
-    onConfirm(formData); 
-  };
+  }, [show, mode, operatorData, setFormData]);
 
   return (
     <Modal show={show} onHide={onClose} centered size="lg">
       <Modal.Header closeButton className="border-0">
         <Modal.Title className="fw-bold">
-          {/* 3. TÍTULO DINÁMICO SEGÚN EL MODO */}
-          {mode === "edit" ? "Editar Operador" : "Registrar Nuevo Operador"}
+          {mode === "create" ? "Registrar Operador" : "Editar Operador"}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="p-4">
-        <Form onSubmit={handleSubmit} autoComplete="off">
+        <Form noValidate>
           <div className="row">
             <div className="col-md-6 mb-3">
-              <Form.Label>Nombre</Form.Label>
-              <Form.Control
-                name="nombre"
-                value={formData.nombre}
-                onChange={handleChange}
-                className={errors.nombre ? "border-danger" : ""}
+              <Form.Label className="fw-semibold">DNI</Form.Label>
+              <Form.Control 
+                type="number" name="DNI" value={formData.DNI} 
+                onChange={handleChange} isInvalid={!!errors.DNI}
               />
-              {errors.nombre && <small className="text-danger ms-1">{errors.nombre}</small>}
+              <Form.Control.Feedback type="invalid">{errors.DNI}</Form.Control.Feedback>
             </div>
             <div className="col-md-6 mb-3">
-              <Form.Label>Apellido</Form.Label>
-              <Form.Control
-                name="apellido"
-                value={formData.apellido}
-                onChange={handleChange}
-                className={errors.apellido ? "border-danger" : ""}
+              <Form.Label className="fw-semibold">N° Legajo</Form.Label>
+              <Form.Control 
+                type="number" name="NLegajo" value={formData.NLegajo} 
+                onChange={handleChange} isInvalid={!!errors.NLegajo}
               />
-              {errors.apellido && <small className="text-danger ms-1">{errors.apellido}</small>}
+              <Form.Control.Feedback type="invalid">{errors.NLegajo}</Form.Control.Feedback>
             </div>
           </div>
 
           <div className="row">
             <div className="col-md-6 mb-3">
-              <Form.Label>DNI</Form.Label>
-              <Form.Control
-                name="dni"
-                value={formData.dni}
-                onChange={handleChange}
-                disabled={mode === "edit"} // Deshabilitado si es edición
-                className={errors.dni ? "border-danger" : ""}
+              <Form.Label className="fw-semibold">Nombre</Form.Label>
+              <Form.Control 
+                name="Name" value={formData.Name} 
+                onChange={handleChange} isInvalid={!!errors.Name}
               />
-              {errors.dni && <small className="text-danger ms-1">{errors.dni}</small>}
+              <Form.Control.Feedback type="invalid">{errors.Name}</Form.Control.Feedback>
             </div>
             <div className="col-md-6 mb-3">
-              <Form.Label>N° de Legajo</Form.Label>
-              <Form.Control
-                name="nroLegajo"
-                value={formData.nroLegajo}
-                onChange={handleChange}
-                disabled={mode === "edit"} // <--- AHORA SÍ FUNCIONA PORQUE 'mode' EXISTE
-                className={errors.nroLegajo ? "border-danger" : ""}
+              <Form.Label className="fw-semibold">Apellido</Form.Label>
+              <Form.Control 
+                name="LastName" value={formData.LastName} 
+                onChange={handleChange} isInvalid={!!errors.LastName}
               />
-              {errors.nroLegajo && <small className="text-danger ms-1">{errors.nroLegajo}</small>}
+              <Form.Control.Feedback type="invalid">{errors.LastName}</Form.Control.Feedback>
             </div>
           </div>
 
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                name="mail"
-                value={formData.mail}
-                onChange={handleChange}
-                className={errors.mail ? "border-danger" : ""}
-              />
-              {errors.mail && <small className="text-danger ms-1">{errors.mail}</small>}
-            </div>
-            <div className="col-md-6 mb-3">
-              <Form.Label>Contraseña {mode === "edit" && "(Opcional)"}</Form.Label>
-              <Form.Control
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className={errors.password ? "border-danger" : ""}
-                placeholder={mode === "edit" ? "Dejar vacío para no cambiar" : ""}
-              />
-              {errors.password && <small className="text-danger ms-1">{errors.password}</small>}
-            </div>
+          <div className="col-md-6 mb-3">
+            <Form.Label className="fw-semibold">Cargo / Rol</Form.Label>
+            <Form.Select 
+              name="position" 
+              value={formData.position} 
+              onChange={handleChange}
+            >
+              <option value="0">Operador Básico</option>
+              <option value="1">Admin</option>
+              <option value="2">SysAdmin</option>
+            </Form.Select>
           </div>
+
+          {mode === "create" && (
+            <div className="mb-3">
+              <Form.Label className="fw-semibold">Contraseña</Form.Label>
+              <Form.Control 
+                type="password" name="Password" value={formData.Password} 
+                onChange={handleChange} isInvalid={!!errors.Password} autoComplete="new-password"
+              />
+              <Form.Control.Feedback type="invalid">{errors.Password}</Form.Control.Feedback>
+            </div>
+          )}
+
+       
 
           <div className="row">
             <div className="col-md-6 mb-3">
-              <Form.Label>Cargo</Form.Label>
-              <Form.Select
-                name="cargo"
-                value={formData.cargo}
-                onChange={handleChange}
-                className={errors.cargo ? "border-danger" : ""}
-              >
-                <option value="">Seleccione...</option>
-                <option value="SysAdmin">SysAdmin (SuperAdmin)</option>
-                <option value="Admin">Admin</option>
-                <option value="Basic">Basic (Operador)</option>
-              </Form.Select>
-              {errors.cargo && <small className="text-danger ms-1">{errors.cargo}</small>}
+              <Form.Label className="fw-semibold">Email</Form.Label>
+              <Form.Control 
+                type="email" name="Email" value={formData.Email} 
+                onChange={handleChange} isInvalid={!!errors.Email}
+              />
+              <Form.Control.Feedback type="invalid">{errors.Email}</Form.Control.Feedback>
+            </div>
+            <div className="col-md-6 mb-3">
+              <Form.Label className="fw-semibold">Celular</Form.Label>
+              <Form.Control 
+                name="Phone" value={formData.Phone} 
+                onChange={handleChange} isInvalid={!!errors.Phone}
+              />
+              <Form.Control.Feedback type="invalid">{errors.Phone}</Form.Control.Feedback>
             </div>
           </div>
         </Form>
       </Modal.Body>
       <Modal.Footer className="border-0">
-        <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-        <Button variant="primary" onClick={handleSubmit}>
-          {/* BOTÓN DINÁMICO */}
-          {mode === "edit" ? "Actualizar" : "Guardar"}
+        <Button variant="light" onClick={onClose}>Cancelar</Button>
+        <Button variant="primary" onClick={() => handleSubmit(onConfirm)}>
+          {mode === "create" ? "Guardar" : "Actualizar"}
         </Button>
       </Modal.Footer>
     </Modal>

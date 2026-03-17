@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react"; // Agregado useEffect
-import "./CitizenStyles.css";
 import TopBar from "../topBar/TopBar";
 import CitizenModals from "./ModalsCitizen";
-import {GetCitizens} from "../../services/CitizenService"
+import {GetCitizens, DeleteCitizen} from "../../services/CitizenService"
 
 const CitizenList = () => {
 
@@ -34,21 +33,21 @@ const cargarDatos = async () => {
     setModalConfig({ show: false, mode: null, data: null });
   };
 
-  const handleConfirmAction = (data) => {
-    // Lógica ABM local (lista para ser reemplazada por fetch POST/PUT/DELETE)
-    if (modalConfig.mode === "create") {
-      setCiudadanos([...ciudadanos, { ...data, id: Date.now() }]);
-    } else if (modalConfig.mode === "edit") {
-      setCiudadanos(ciudadanos.map(c => c.id === data.id ? data : c));
-    } else if (modalConfig.mode === "delete") {
-      setCiudadanos(ciudadanos.filter(c => c.id !== data));
+const handleConfirmAction = async (dni) => {
+    try {
+      if (modalConfig.mode === "delete") {
+        await DeleteCitizen(dni); // Lógica de borrado real
+      }
+      
+      handleCloseModal();
+      cargarDatos(); 
+    } catch (error) {
+      alert("Error en la operación: " + error.message);
     }
-    handleCloseModal();
-    cargarDatos();
   };
 
   return (
-    <>
+    <div className="main-bg-clean">
       <TopBar />
       <div className="container mt-4">
         {loading ? (
@@ -60,7 +59,7 @@ const cargarDatos = async () => {
           <>
             <div className="card shadow rounded bg-white">
               <div className="card-body">
-                <h3 className="card-title mb-3">Lista de Ciudadanos</h3>
+                <h3 className="custom-card-title mb-3">Lista de Ciudadanos</h3>
                 <div className="table-responsive">
                   <table className="table table-striped table-bordered mb-0">
                     <thead className="table-primary text-white">
@@ -101,7 +100,7 @@ const cargarDatos = async () => {
               </div>
             </div>
             <div className="d-flex justify-content-end mt-3">
-              <button className="btn btn-success" id="styleButton" onClick={() => handleOpenModal("create")}>
+              <button className="btn btn-action-teal btn-success"  onClick={() => handleOpenModal("create")}>
                 <i className="bi bi-person-plus-fill me-2"></i> Registrar Ciudadano
               </button>
             </div>
@@ -116,7 +115,7 @@ const cargarDatos = async () => {
         onClose={handleCloseModal} 
         onConfirm={handleConfirmAction} 
       />
-    </>
+    </div>
   );
 };
 

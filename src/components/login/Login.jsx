@@ -2,9 +2,11 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, FormGroup } from "react-bootstrap";
 import { loginService } from "../../services/AuthService.jsx";
+import { useAuth } from "../../hooks/useAuth";
 import "./Login.css";
 
 const Login = () => {
+  const { setUser } = useAuth();
   const [nLegajo, setNLegajo] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
@@ -44,6 +46,10 @@ const Login = () => {
           nLegajo: nLegajo, 
           password: password 
       });
+
+      if (user) {
+        setUser(user); 
+      }
 
       console.log("Login exitoso");
       navigate("/incidence");

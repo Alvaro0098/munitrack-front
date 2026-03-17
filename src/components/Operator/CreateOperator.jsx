@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import TopBar from "../topBar/TopBar";
+import { useAuth } from "../../hooks/useAuth";
 import OperatorModals from "./ModalsOperator"; 
 import { GetOperators, DeleteOperator, CreateOperator, UpdateOperator } from "../../services/OperatorService";
 
 const OperatorList = () => {
   const [operators, setOperators] = useState([]);
-  
+  const { isSuperAdmin } = useAuth();
   const [modalConfig, setModalConfig] = useState({
     show: false,
     mode: null, 
     data: null  
   });
 
+  // Carga inicial de datos desde la API
   const cargarDatos = async () => {
     try {
       const data = await GetOperators(); 
@@ -25,6 +27,30 @@ const OperatorList = () => {
     cargarDatos(); 
   }, []);
 
+  // Única declaración de handleConfirmAction (Arreglada)
+  const handleConfirmAction = async (formData) => {
+    try {
+      // Sincronización de tipos para el Backend
+      const processedData = {
+        ...formData,
+        dni: Number(formData.DNI),
+        nLegajo: Number(formData.NLegajo),
+        position: Number(formData.position)
+      };
+
+      if (modalConfig.mode === "create") {
+        await CreateOperator(processedData);
+        alert("Operador creado");
+      } else if (modalConfig.mode === "edit") {
+        await UpdateOperator(modalConfig.data.dni, processedData);
+        alert("Operador actualizado");
+      }
+      
+      await cargarDatos(); 
+      handleCloseModal();
+    } catch (error) { alert("Error: " + error.message); }
+  };
+
   const handleDirectDelete = async (dni) => {
     if (!dni) {
       alert("Error: El DNI es nulo o indefinido.");
@@ -36,7 +62,6 @@ const OperatorList = () => {
       await DeleteOperator(dni); 
       await cargarDatos(); 
     } catch (error) {
-      // Mantenemos esto: si el Back devuelve 403, el usuario se entera aquí
       alert(error.status === 403 
         ? "Acceso Denegado: Su rol no tiene permisos para eliminar operadores." 
         : "Error al eliminar: " + error.message);
@@ -47,40 +72,13 @@ const OperatorList = () => {
   const handleOpenEdit = (operador) => setModalConfig({ show: true, mode: "edit", data: operador });
   const handleCloseModal = () => setModalConfig({ show: false, mode: null, data: null });
 
-  const handleConfirmAction = async (formData) => {
-    try {
-      if (modalConfig.mode === "create") {
-        const createPayload = {
-          DNI: formData.dni,
-          Name: formData.nombre,
-          LastName: formData.apellido,
-          NLegajo: formData.nroLegajo,
-          Password: formData.password,
-          Phone: formData.celular,
-          Email: formData.mail,
-          Position: formData.cargo 
-        };
-        await CreateOperator(createPayload);
-      } 
-      else if (modalConfig.mode === "edit") {
-        await UpdateOperator(modalConfig.data.dni, formData);
-      }
-      await cargarDatos(); 
-      handleCloseModal();
-    } catch (error) {
-      alert(error.status === 403 
-        ? "Acceso Denegado: No tiene permisos para realizar esta operación." 
-        : "Error: " + error.message); 
-    }
-  };
-
   return (
-    <>
+    <div className="main-bg-overlay">
       <TopBar />
       <div className="container mt-4">
         <div className="card shadow rounded bg-white">
           <div className="card-body">
-            <h3 className="card-title mb-3">Lista de Operadores</h3>
+            <h3 className="custom-card-title mb-3">Lista de Operadores</h3>
             <div className="table-responsive">
               <table className="table table-striped table-bordered mb-0">
                 <thead className="table-primary">
@@ -103,10 +101,15 @@ const OperatorList = () => {
                       <td>{operador.nLegajo}</td>
                       <td>{operador.email}</td>
                       <td>
-                        <span className="badge bg-info text-dark">{operador.position}</span>
+                  <span className="badge bg-info text-dark">
+                          {operador.position === "SysAdmin" ? "SysAdmin" : 
+                           operador.position === "Admin" ? "Admin" : 
+                            "Básico"}
+                  </span>
                       </td>
                       <td className="text-center">
-                        <div className="d-flex justify-content-center gap-2">
+                        {isSuperAdmin && (
+                          <div className="d-flex justify-content-center gap-2">                          
                           <button 
                             className="btn btn-outline-primary btn-sm" 
                             onClick={() => handleOpenEdit(operador)}
@@ -122,6 +125,7 @@ const OperatorList = () => {
                             <i className="bi bi-trash3-fill"></i>
                           </button>
                         </div>
+                        )}
                       </td>
                     </tr>
                   ))}   
@@ -132,9 +136,11 @@ const OperatorList = () => {
         </div>
 
         <div className="d-flex justify-content-end mt-3 mb-3">
-          <button className="btn btn-success" id="styleButton" onClick={handleOpenCreate}>
+           {isSuperAdmin && (
+          <button className="btn btn-action-teal btn-lg shadow" onClick={handleOpenCreate}>
             <i className="bi bi-person-plus-fill me-2"></i> Registrar Operador
           </button>
+           )}
         </div>
       </div>
 
@@ -145,7 +151,7 @@ const OperatorList = () => {
         onClose={handleCloseModal}
         onConfirm={handleConfirmAction} 
       />
-    </>
+    </div>
   );
 };
 

@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from "react";
-import "./AreaDetails.css"; 
 import TopBar from "../topBar/TopBar";
+import { useAuth } from "../../hooks/useAuth";
 import ModalsArea from "./ModalsArea"; 
 import { GetAreas } from "../../services/AreaService";
-// Importamos ROLES para mantener la arquitectura limpia
-import { ROLES } from "../../services/AuthService.jsx";
 
 const AreaList = () => {
   const [areas, setAreas] = useState([]);
+  const { isSuperAdmin, isAdmin } = useAuth(); // Usamos los booleanos del context
   const [loading, setLoading] = useState(true);
   const [modalConfig, setModalConfig] = useState({ show: false, mode: null, data: null });
-  const userData = JSON.parse(localStorage.getItem("user"));
-  const currentRole = Number(userData?.rol); 
-  const canAccessActions = currentRole === ROLES.SUPER_ADMIN || currentRole === ROLES.ADMIN;
 
   const cargarDatos = async () => {
     setLoading(true);
@@ -44,12 +40,12 @@ const AreaList = () => {
   };
 
   return (
-    <div className="bg-fondo">
+    <div className="main-bg-overlay">
       <TopBar />
       <div className="container mt-4">
         <div className="card shadow rounded bg-white">
           <div className="card-body">
-            <h3 className="card-title mb-4 fw-bold text-dark">Gestión de Áreas</h3>
+            <h3 className="custom-card-title mb-4 fw-bold text-dark">Gestión de Áreas</h3>
             
             <div className="table-responsive">
               <table className="table table-striped table-bordered mb-0">
@@ -58,13 +54,14 @@ const AreaList = () => {
                     <th style={{ width: "100px" }}>ID</th>
                     <th>Nombre de la Dependencia</th>
                     <th>Descripción / Función</th>
-                    {canAccessActions && <th className="text-center">Acciones</th>}
+                    {/* Solo mostramos la columna de Acciones si tiene permisos */}
+                    {(isSuperAdmin || isAdmin) && <th className="text-center">Acciones</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={canAccessActions ? "4" : "3"} className="text-center py-4">
+                      <td colSpan={(isSuperAdmin || isAdmin) ? 4 : 3} className="text-center py-4">
                         Cargando datos...
                       </td>
                     </tr>
@@ -74,7 +71,9 @@ const AreaList = () => {
                         <td>{area.id}</td>
                         <td className="fw-bold">{area.name}</td>
                         <td>{area.description || "Sin descripción disponible"}</td>
-                        {canAccessActions && (
+              
+                        {/* Renderizado condicional de botones Editar/Eliminar */}
+                        {(isSuperAdmin || isAdmin) && (
                           <td className="text-center">
                             <div className="d-flex justify-content-center gap-2">
                               <button 
@@ -98,7 +97,7 @@ const AreaList = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={canAccessActions ? "4" : "3"} className="text-center py-4">
+                      <td colSpan={(isSuperAdmin || isAdmin) ? 4 : 3} className="text-center py-4">
                         No se encontraron áreas registradas.
                       </td>
                     </tr>
@@ -109,11 +108,11 @@ const AreaList = () => {
           </div>
         </div>
 
-        {canAccessActions && (
+        {/* Renderizado condicional del botón Registrar Nueva Área */}
+        {(isSuperAdmin || isAdmin) && (
           <div className="d-flex justify-content-end mt-4">
             <button 
-              className="btn btn-primary btn-lg shadow" 
-              id="button-register"
+              className="btn btn-action-blue btn-lg shadow" 
               onClick={() => handleOpenModal("create")}
             >
               <i className="bi bi-plus-circle me-2"></i> Registrar Nueva Área

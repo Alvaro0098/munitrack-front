@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import TopBar from "../topBar/TopBar";
-// IMPORTANTE: El nombre debe ser igual al archivo físico ModalsIncidence.jsx
 import ModalsIncidence from "./ModalsIncidence"; 
 import { GetIncidences, CreateIncidence, UpdateIncidence, DeleteIncidence } from "../../services/IncidenceService";
 
@@ -52,12 +51,12 @@ const handleConfirmAction = async (formData) => {
 };
 
   return (
-    <div className="bg-fondo">
+    <div className="main-bg-overlay">
       <TopBar />
       <div className="container mt-4 pb-5">
         <div className="card shadow border-0 bg-white">
           <div className="card-body p-4 text-dark">
-            <h3 className="fw-bold mb-4">Registro de Incidencias</h3>
+            <h3 className="custom-card-title mb-4">Registro de Incidencias</h3>
             <div className="table-responsive">
               <table className="table table-hover align-middle">
                 <thead className="table-primary text-white">
@@ -116,7 +115,7 @@ const handleConfirmAction = async (formData) => {
         </div>
         <div className="d-flex justify-content-end mt-3">
           <button 
-            className="btn btn-primary btn-lg shadow" 
+            className="btn btn-action-orange btn-lg shadow" 
             id="button-register"
             onClick={() => setModalConfig({ show: true, mode: "create", data: null })}
           >

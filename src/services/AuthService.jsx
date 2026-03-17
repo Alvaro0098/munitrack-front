@@ -1,10 +1,5 @@
-const API_URL = "https://munitrack-a3gcd3gqctffeeb0.eastus-01.azurewebsites.net/api/Authentication";
-
-export const ROLES = {
-    SUPER_ADMIN: 2, 
-    ADMIN: 1,       
-    USER: 0         
-};
+//const API_URL = "https://munitrack-a3gcd3gqctffeeb0.eastus-01.azurewebsites.net/api/Authentication";
+const API_URL = "http://localhost:5216/api/Authentication";
 
 export const loginService = async ({ nLegajo, password }) => { 
     const response = await fetch(`${API_URL}/authenticate`, {
@@ -18,23 +13,30 @@ export const loginService = async ({ nLegajo, password }) => {
     const data = await response.text(); 
     
     if (data) {
-        
         localStorage.setItem("token", data);
         const decoded = getUserData(); 
         
         if (decoded) {
-            const rawRole = decoded.role || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+            // Usamos el rol que ya procesó getUserData (0, 1 o 2)
+            const userObj = { 
+                name: decoded.given_name || "Usuario", 
+                role: decoded.role 
+            };
 
+            // Mantenemos tu guardado actual intacto
             localStorage.setItem("user", JSON.stringify({ 
-                nombre: decoded.given_name || "Usuario", 
+                nombre: userObj.name, 
                 apellido: decoded.family_name || "",
-                legajo: nLegajo, // Este viene del parámetro de la función
-                rol: Number(rawRole)
+                legajo: nLegajo,
+                rol: userObj.role
             }));
+
+            // DEVOLVEMOS EL OBJETO para que el componente actualice el Contexto
+            return userObj; 
         }
     }
     
-    return data; 
+    return null; 
 };
 
 export const getUserData = () => {
@@ -42,14 +44,28 @@ export const getUserData = () => {
     if (!token) return null;
 
     try {
-        // Decodificamos el payload del JWT
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const payload = JSON.parse(window.atob(base64));
-        return payload 
+
+        const rawRole = payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+        let positionId;
+        switch (rawRole) {
+            case "Admin": positionId = 1; break;
+            case "SysAdmin": positionId = 2; break;
+            case "Basic": positionId = 0; break; 
+            default: 
+                // Aquí el Number() asegura que si viene "0" sea 0
+                positionId = !isNaN(rawRole) ? Number(rawRole) : 0;
+        }
+        
+        return {
+            ...payload,
+            role: positionId
+        };
     } catch (e) {
         console.error("Error decodificando el token", e);
-        console.error("ERROR: El token existe pero no se pudo decodificar. ¿Es un JWT válido?", e);
         return null;
     }
 };

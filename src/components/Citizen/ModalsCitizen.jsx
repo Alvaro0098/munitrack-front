@@ -113,10 +113,19 @@ const sendCitizen = async (e) => {
       <Modal.Body className="text-center p-4">
         <i className="bi bi-exclamation-triangle text-danger" style={{ fontSize: "3rem" }}></i>
         <h5 className="mt-3 fw-bold">¿Eliminar Ciudadano?</h5>
-        <p className="text-muted">Se borrará a <b>{citizenData?.nombre}</b>.</p>
+        <p className="text-muted">
+          Se borrará a: <br />
+          <b className="text-dark">
+            {citizenData?.name} {citizenData?.lastName} 
+          </b>
+          <br />
+          <small className="text-secondary">(dni: {citizenData?.dni})</small>
+        </p>
         <div className="d-flex justify-content-center gap-2 mt-4">
           <Button variant="light" onClick={onClose}>No</Button>
-          <Button variant="danger" onClick={() => onConfirm(citizenData.id)}>Sí, eliminar</Button>
+          <Button variant="danger" onClick={() => onConfirm(citizenData?.dni)}>
+            Sí, eliminar
+          </Button>
         </div>
       </Modal.Body>
     </Modal>

@@ -1,4 +1,5 @@
-const API_URL = "https://munitrack-a3gcd3gqctffeeb0.eastus-01.azurewebsites.net";
+//const API_URL = "https://munitrack-a3gcd3gqctffeeb0.eastus-01.azurewebsites.net";
+const API_URL = "http://localhost:5216";
 
 export const CreateCitizen = async (citizenData) => { 
 
@@ -50,3 +51,19 @@ export const GetCitizens = async () => {
 
     return await response.json();
 }; 
+
+export const DeleteCitizen = async (dni) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/api/Citizen/${dni}`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error("Error al eliminar el ciudadano");
+    }
+    return true; 
+};
