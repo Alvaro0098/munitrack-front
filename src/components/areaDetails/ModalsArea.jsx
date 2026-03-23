@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
 
 const ModalsArea = ({ show, mode, areaData, onClose, onConfirm }) => {
-  // Estado local para manejar los inputs del formulario
   const [formData, setFormData] = useState({ titulo: "", desc: "" });
 
-  // Sincronización: Cada vez que el modal se abre o cambia el areaData
   useEffect(() => {
-    if (mode !== "add" && areaData) {
-      setFormData({
-        titulo: areaData.titulo || "",
-        desc: areaData.desc || ""
-      });
-    } else {
-      setFormData({ titulo: "", desc: "" });
+    if (show) {
+      if (mode !== "create" && areaData) {
+        // Mapeamos los datos del backend a tus variables titulo/desc
+        setFormData({
+          titulo: areaData.name || "",
+          desc: areaData.description || ""
+        });
+      } else {
+        setFormData({ titulo: "", desc: "" });
+      }
     }
   }, [areaData, mode, show]);
 
@@ -20,7 +21,6 @@ const ModalsArea = ({ show, mode, areaData, onClose, onConfirm }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Enviamos el formData al handleSave del componente padre
     onConfirm(formData);
   };
 
@@ -30,22 +30,23 @@ const ModalsArea = ({ show, mode, areaData, onClose, onConfirm }) => {
       <div className="modal fade show d-block" tabIndex="-1">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content border-0 shadow">
-            {/* Header dinámico según el modo */}
-            <div className={`modal-header ${mode === 'delete' ? 'bg-danger' : 'bg-primary'} text-white`}>
-              <h5 className="modal-title">
-                {mode === "add" && "Nueva Área Municipal"}
+            <div className={`modal-header ${mode === 'delete' ? 'bg-danger' : 'bg-primary'} text-white border-0`}>
+              <h5 className="modal-title fw-bold">
+                {mode === "create" && "Nueva Área Municipal"}
                 {mode === "edit" && "Modificar Área"}
-                {mode === "delete" && "¡Atención!"}
+                {mode === "delete" && "Confirmar Eliminación"}
               </h5>
               <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
             </div>
 
-            <div className="modal-body p-4">
+            <div className="modal-body p-4 text-dark">
               {mode === "delete" ? (
                 <div className="text-center">
-                  <p className="fs-5">¿Confirmas la eliminación del área?</p>
-                  <p className="fw-bold text-danger" style={{ fontSize: '1.2rem' }}>{formData.titulo}</p>
-                  <p className="text-muted small">Esta acción no se puede deshacer.</p>
+                  <i className="bi bi-exclamation-triangle text-danger mb-3" style={{ fontSize: "3rem" }}></i>
+                  <p className="fs-5">¿Estás seguro de eliminar esta área?</p>
+                  <b className="text-dark d-block mb-1" style={{ fontSize: '1.2rem' }}>{formData.titulo}</b>
+                  <small className="text-muted">ID de referencia: {areaData?.id}</small>
+                  <p className="text-danger small mt-3 mt-2"><i className="bi bi-info-circle me-1"></i>Esta acción es irreversible.</p>
                 </div>
               ) : (
                 <form id="areaForm" onSubmit={handleSubmit}>
@@ -53,7 +54,7 @@ const ModalsArea = ({ show, mode, areaData, onClose, onConfirm }) => {
                     <label className="form-label fw-bold">Nombre de la Dependencia</label>
                     <input 
                       type="text" 
-                      className="form-control form-control-lg"
+                      className="form-control"
                       placeholder="Ej: Secretaría de Salud"
                       value={formData.titulo} 
                       onChange={(e) => setFormData({...formData, titulo: e.target.value})}
@@ -77,14 +78,22 @@ const ModalsArea = ({ show, mode, areaData, onClose, onConfirm }) => {
 
             <div className="modal-footer border-0">
               <button className="btn btn-light px-4" onClick={onClose}>Cancelar</button>
-              <button 
-                type="submit"
-                form="areaForm"
-                className={`btn ${mode === 'delete' ? 'btn-danger' : 'btn-primary'} px-4`}
-                onClick={mode === 'delete' ? () => onConfirm(formData) : undefined}
-              >
-                {mode === "delete" ? "Eliminar Definitivamente" : "Guardar Cambios"}
-              </button>
+              {mode === "delete" ? (
+                <button 
+                  className="btn btn-danger px-4 shadow-sm"
+                  onClick={() => onConfirm(areaData.id)}
+                >
+                  Eliminar Definitivamente
+                </button>
+              ) : (
+                <button 
+                  type="submit"
+                  form="areaForm"
+                  className="btn btn-primary px-4 shadow-sm"
+                >
+                  Guardar Cambios
+                </button>
+              )}
             </div>
           </div>
         </div>

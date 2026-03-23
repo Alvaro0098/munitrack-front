@@ -1,28 +1,29 @@
-import React, { useState, useEffect } from "react"; // Agregado useEffect
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom"; // Importante para la navegación SPA
+import { Search } from "lucide-react"; // Icono coherente con el buscador
 import TopBar from "../topBar/TopBar";
 import CitizenModals from "./ModalsCitizen";
-import {GetCitizens, DeleteCitizen} from "../../services/CitizenService"
+import { GetCitizens, DeleteCitizen } from "../../services/CitizenService";
 
 const CitizenList = () => {
-
   const [citizens, setCitizens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalConfig, setModalConfig] = useState({ show: false, mode: null, data: null });
 
-const cargarDatos = async () => {
-    setLoading(true); // Iniciamos carga
+  const cargarDatos = async () => {
+    setLoading(true);
     try {
-      const data = await GetCitizens(); 
-      setCitizens(data); 
+      const data = await GetCitizens();
+      setCitizens(data);
     } catch (error) {
       console.error("Error cargando ciudadanos:", error);
     } finally {
-      setLoading(false); // 1. IMPORTANTE: Apagamos el spinner siempre
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    cargarDatos(); 
+    cargarDatos();
   }, []);
 
   const handleOpenModal = (mode, data = null) => {
@@ -33,14 +34,13 @@ const cargarDatos = async () => {
     setModalConfig({ show: false, mode: null, data: null });
   };
 
-const handleConfirmAction = async (dni) => {
+  const handleConfirmAction = async (dni) => {
     try {
       if (modalConfig.mode === "delete") {
-        await DeleteCitizen(dni); // Lógica de borrado real
+        await DeleteCitizen(dni);
       }
-      
       handleCloseModal();
-      cargarDatos(); 
+      cargarDatos();
     } catch (error) {
       alert("Error en la operación: " + error.message);
     }
@@ -57,9 +57,23 @@ const handleConfirmAction = async (dni) => {
           </div>
         ) : (
           <>
+            {/* Cabecera con título y link de búsqueda avanzada */}
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h3 className="custom-card-title mb-0">Lista de Ciudadanos</h3>
+              
+              {/* LINK DE BÚSQUEDA AVANZADA */}
+              <Link 
+                to="/CitizenSearch" 
+                className="nav-btn text-decoration-none d-flex align-items-center"
+                style={{ color: 'var(--primary-blue)', fontSize: '0.9rem' }}
+              >
+                <Search size={16} className="me-1" />
+                Búsqueda Avanzada por DNI
+              </Link>
+            </div>
+
             <div className="card shadow rounded bg-white">
-              <div className="card-body">
-                <h3 className="custom-card-title mb-3">Lista de Ciudadanos</h3>
+              <div className="card-body p-0"> {/* P-0 para que la tabla llegue a los bordes si prefieres */}
                 <div className="table-responsive">
                   <table className="table table-striped table-bordered mb-0">
                     <thead className="table-primary text-white">
@@ -99,8 +113,9 @@ const handleConfirmAction = async (dni) => {
                 </div>
               </div>
             </div>
+
             <div className="d-flex justify-content-end mt-3">
-              <button className="btn btn-action-teal btn-success"  onClick={() => handleOpenModal("create")}>
+              <button className="btn btn-action-teal" onClick={() => handleOpenModal("create")}>
                 <i className="bi bi-person-plus-fill me-2"></i> Registrar Ciudadano
               </button>
             </div>

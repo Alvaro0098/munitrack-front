@@ -3,6 +3,7 @@ import Login from "../components/login/Login";
 import CreateOperador from "../components/Operator/CreateOperator";
 import CreateCitizen from "../components/Citizen/CreateCitizen";
 import Incidence from "../components/incidenceDetails/Incidence";
+import DeletedIncidence from "../components/incidenceDetails/DeletedIncidence";
 import UserNotFound from "../components/usernotfound/UserNotFound";
 import CitizenSearch from "../components/Citizen/CitizenSearch";
 import ForgotPassword from "../components/forgotPassword/ForgotPassword";
@@ -19,6 +20,7 @@ const RouterPrincipal = () => {
           <Route path="/operators" element={<CreateOperador />} />
           <Route path="/citizens" element={<CreateCitizen/>} />
           <Route path="/incidence" element={<Incidence />} />
+          <Route path="/incidence/deleted" element={<DeletedIncidence />} />
           <Route path="/UserNotFound" element={<UserNotFound />} />
           <Route path="/CitizenSearch" element={<CitizenSearch />} />
           <Route path="/ForgotPassword" element={<ForgotPassword />}/>

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Toast, ToastContainer } from "react-bootstrap";
 import TopBar from "../topBar/TopBar";
 import ModalsIncidence from "./ModalsIncidence"; 
 import { GetIncidences, CreateIncidence, UpdateIncidence, DeleteIncidence } from "../../services/IncidenceService";
@@ -11,9 +13,12 @@ const ESTADO_MAP = {
 };
 
 const IncidenceList = () => {
+  const navigate = useNavigate();
   const [incidences, setIncidences] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalConfig, setModalConfig] = useState({ show: false, mode: "", data: null });
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   const loadData = async () => {
     setLoading(true);
@@ -26,33 +31,52 @@ const IncidenceList = () => {
 
   useEffect(() => { loadData(); }, []);
 
-const handleDirectDelete = async (id) => {
-  if (!window.confirm(`¿Eliminar incidencia ID: ${id}?`)) return;
-  try {
-    await DeleteIncidence(id);
-    await loadData();
-  } catch (error) {
-    alert(error.message);
-  }
-};
-
-const handleConfirmAction = async (formData) => {
-  try {
-    if (modalConfig.mode === "create") {
-      await CreateIncidence(formData);
-    } else if (modalConfig.mode === "edit") {
-      await UpdateIncidence(modalConfig.data.id, formData);
+  // REVISIÓN: Ahora handleConfirmAction maneja también el borrado por ID
+  const handleConfirmAction = async (formDataOrId) => {
+    try {
+      if (modalConfig.mode === "create") {
+        await CreateIncidence(formDataOrId);
+        setToastMessage("¡Incidencia creada exitosamente!");
+      } else if (modalConfig.mode === "edit") {
+        await UpdateIncidence(modalConfig.data.id, formDataOrId);
+        setToastMessage("¡Incidencia actualizada exitosamente!");
+      } else if (modalConfig.mode === "delete") {
+        await DeleteIncidence(formDataOrId); // Aquí recibe el ID directamente
+        setToastMessage("¡Incidencia eliminada exitosamente!");
+      }
+      
+      setShowSuccessToast(true);
+      await loadData();
+      setModalConfig({ show: false, mode: "", data: null });
+    } catch (error) {
+      alert("Error: " + error.message);
     }
-    await loadData();
-    setModalConfig({ show: false, mode: "", data: null });
-  } catch (error) {
-    alert("Error: " + error.message);
-  }
-};
+  };
+
+  const handleOpenDelete = (inc) => {
+    setModalConfig({ show: true, mode: "delete", data: inc });
+  };
 
   return (
     <div className="main-bg-overlay">
       <TopBar />
+      <ToastContainer position="top-end" className="p-3">
+        <Toast 
+          onClose={() => setShowSuccessToast(false)} 
+          show={showSuccessToast} 
+          delay={3000} 
+          autohide
+          className="border-0 shadow"
+        >
+          <Toast.Header closeButton className="bg-success text-white border-0">
+            <i className="bi bi-check-circle me-2"></i>
+            <strong className="me-auto">Éxito</strong>
+          </Toast.Header>
+          <Toast.Body className="bg-light">
+            {toastMessage}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
       <div className="container mt-4 pb-5">
         <div className="card shadow border-0 bg-white">
           <div className="card-body p-4 text-dark">
@@ -80,9 +104,10 @@ const handleConfirmAction = async (formData) => {
                           {ESTADO_MAP[inc.state]?.label}
                         </span>
                       </td>
-                      <td><td className="fw-bold">
-                      {inc.area?.name || `ID: ${inc.areaId}`} 
-                      </td> 
+                      <td>
+                        <span className="fw-bold">
+                          {inc.area?.name || `ID: ${inc.areaId}`} 
+                        </span> 
                       </td>
                       <td className="text-muted small">{inc.description}</td>
                       <td>
@@ -92,19 +117,19 @@ const handleConfirmAction = async (formData) => {
                       </td>
                       <td className="text-center">
                         <div className="d-flex justify-content-center gap-2">
-                        <button 
-                          className="btn btn-outline-primary btn-sm"
-                          onClick={() => setModalConfig({ show: true, mode: "edit", data: inc })}
-                        >
-                          <i className="bi bi-pencil-square"></i>
-                        </button>
-                      <button 
+                          <button 
+                            className="btn btn-outline-primary btn-sm"
+                            onClick={() => setModalConfig({ show: true, mode: "edit", data: inc })}
+                          >
+                            <i className="bi bi-pencil-square"></i>
+                          </button>
+                          <button 
                             className="btn btn-outline-danger btn-sm"
-                            onClick={() => handleDirectDelete(inc.id)}
-                        >
-                          <i className="bi bi-trash3-fill"></i>
-                      </button>
-                    </div>
+                            onClick={() => handleOpenDelete(inc)}
+                          >
+                            <i className="bi bi-trash3-fill"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -113,7 +138,14 @@ const handleConfirmAction = async (formData) => {
             </div>
           </div>
         </div>
-        <div className="d-flex justify-content-end mt-3">
+        <div className="d-flex justify-content-end gap-2 mt-3">
+          <button 
+            className="btn btn-outline-secondary btn-lg shadow" 
+            title="Ver incidencias eliminadas"
+            onClick={() => navigate("/incidence/deleted")}
+          >
+            <i className="bi bi-trash3"></i> Papelera
+          </button>
           <button 
             className="btn btn-action-orange btn-lg shadow" 
             id="button-register"
@@ -124,7 +156,6 @@ const handleConfirmAction = async (formData) => {
         </div>
       </div>
       
-      {/* Usamos el nombre correcto del componente aquí abajo */}
       <ModalsIncidence 
         show={modalConfig.show} 
         mode={modalConfig.mode} 

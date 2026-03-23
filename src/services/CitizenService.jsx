@@ -67,3 +67,19 @@ export const DeleteCitizen = async (dni) => {
     }
     return true; 
 };
+
+export const GetCitizenByDni = async (dni) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/api/Citizen/${dni}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    if (response.status === 404) return null; // Ciudadano no encontrado
+    if (!response.ok) throw new Error("Error en la búsqueda");
+    
+    return await response.json();
+};

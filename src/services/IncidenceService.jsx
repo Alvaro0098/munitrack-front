@@ -73,3 +73,29 @@ export const DeleteIncidence = async (id) => {
     if (!response.ok) throw new Error("Error al eliminar");
     return true; 
 };
+
+export const GetDeletedIncidences = async () => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/api/Incidence/deleted`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    });
+    if (!response.ok) throw new Error("Error al obtener incidencias eliminadas");
+    return await response.json();
+};
+
+export const RestoreIncidence = async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/api/Incidence/${id}/restore`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    });
+    if (!response.ok) throw new Error("Error al restaurar incidencia");
+    return true;
+};

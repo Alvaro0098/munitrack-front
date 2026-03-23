@@ -39,3 +39,31 @@ export const GetAreas = async () => {
     if (!response.ok) throw new Error("Error al obtener las áreas");
     return await response.json();
 };
+
+export const DeleteArea = async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/api/Area/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error("No se pudo eliminar el área municipal.");
+    return true;
+};
+
+export const UpdateArea = async (id, areaData) => {
+    const token = localStorage.getItem("token");
+    const payload = {
+        Name: areaData.titulo,
+        Description: areaData.desc,
+    };
+    const response = await fetch(`${API_URL}/api/Area/${id}`, {
+        method: "PUT",
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` 
+        },
+        body: JSON.stringify(payload),
+    });
+    if (!response.ok) throw new Error("Error al actualizar");
+    return true;
+};

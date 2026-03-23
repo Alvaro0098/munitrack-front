@@ -35,11 +35,11 @@ const ModalsIncidence = ({ show, mode, incidenceData, onClose, onConfirm }) => {
         console.error("Error al cargar áreas:", error);
       }
     };
-    if (show) fetchAreas();
-  }, [show]);
+    if (show && mode !== "delete") fetchAreas();
+  }, [show, mode]);
 
   useEffect(() => {
-    if (show) {
+    if (show && mode !== "delete") {
       if (mode === "edit" && incidenceData) {
         setFormData({
           fecha: incidenceData.date ? incidenceData.date.split('T')[0] : "",
@@ -60,12 +60,7 @@ const ModalsIncidence = ({ show, mode, incidenceData, onClose, onConfirm }) => {
     }
   }, [mode, incidenceData, show, setFormData]);
 
-  const handleSave = () => {
-    
-    handleSubmit(onConfirm); 
-  };
-
-  return (
+  const renderFormModal = () => (
     <Modal show={show} onHide={onClose} centered size="lg">
       <Modal.Header closeButton className="border-0">
         <Modal.Title className="fw-bold">
@@ -73,7 +68,7 @@ const ModalsIncidence = ({ show, mode, incidenceData, onClose, onConfirm }) => {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="p-4">
-        <Form noValidate> {/* Se agrega noValidate para usar el feedback de Bootstrap */}
+        <Form noValidate>
           <div className="row">
             <div className="col-md-4 mb-3">
               <Form.Label className="fw-semibold">Fecha</Form.Label>
@@ -140,12 +135,36 @@ const ModalsIncidence = ({ show, mode, incidenceData, onClose, onConfirm }) => {
       </Modal.Body>
       <Modal.Footer className="border-0">
         <Button variant="light" onClick={onClose}>Cancelar</Button>
-        <Button variant="primary" onClick={handleSave}> {/* Cambio clave: handleSave */}
+        <Button variant="primary" onClick={() => handleSubmit(onConfirm)}>
           {mode === "create" ? "Guardar" : "Actualizar"}
         </Button>
       </Modal.Footer>
     </Modal>
   );
+
+  const renderDeleteModal = () => (
+    <Modal show={show} onHide={onClose} centered size="sm">
+      <Modal.Body className="text-center p-4">
+        <i className="bi bi-exclamation-triangle text-danger" style={{ fontSize: "3rem" }}></i>
+        <h5 className="mt-3 fw-bold">¿Eliminar Incidencia?</h5>
+        <p className="text-muted">
+          Se borrará la incidencia con ID: <b className="text-dark">{incidenceData?.id}</b> <br />
+          Operador responsable: <br />
+          <b className="text-dark">
+            {incidenceData?.operator 
+              ? `${incidenceData.operator.name} ${incidenceData.operator.lastName}` 
+              : `ID Operador: ${incidenceData?.operatorId}`}
+          </b>
+        </p>
+        <div className="d-flex justify-content-center gap-2 mt-4">
+          <Button variant="light" onClick={onClose}>No</Button>
+          <Button variant="danger" onClick={() => onConfirm(incidenceData?.id)}>Sí, eliminar</Button>
+        </div>
+      </Modal.Body>
+    </Modal>
+  );
+
+  return mode === "delete" ? renderDeleteModal() : renderFormModal();
 };
 
 export default ModalsIncidence;

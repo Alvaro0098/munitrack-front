@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import TopBar from "../topBar/TopBar";
 import { useAuth } from "../../hooks/useAuth";
 import ModalsArea from "./ModalsArea"; 
-import { GetAreas } from "../../services/AreaService";
+import { GetAreas, DeleteArea, CreateArea, UpdateArea } from "../../services/AreaService";
 
 const AreaList = () => {
   const [areas, setAreas] = useState([]);
-  const { isSuperAdmin, isAdmin } = useAuth(); // Usamos los booleanos del context
+  const { isSuperAdmin, isAdmin } = useAuth();
   const [loading, setLoading] = useState(true);
   const [modalConfig, setModalConfig] = useState({ show: false, mode: null, data: null });
 
@@ -34,9 +34,22 @@ const AreaList = () => {
     setModalConfig({ show: false, mode: null, data: null });
   };
 
-  const handleConfirmAction = () => {
-    cargarDatos();
-    handleCloseModal();
+  // REVISIÓN: Implementación asíncrona para soportar Delete por ID
+  const handleConfirmAction = async (formData) => {
+    try {
+      if (modalConfig.mode === "delete") {
+        await DeleteArea(modalConfig.data.id);
+      } else if (modalConfig.mode === "create") {
+        await CreateArea(formData);
+      } else if (modalConfig.mode === "edit") {
+        await UpdateArea(modalConfig.data.id, formData);
+      }
+      
+      await cargarDatos();
+      handleCloseModal();
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
   };
 
   return (
@@ -46,7 +59,6 @@ const AreaList = () => {
         <div className="card shadow rounded bg-white">
           <div className="card-body">
             <h3 className="custom-card-title mb-4 fw-bold text-dark">Gestión de Áreas</h3>
-            
             <div className="table-responsive">
               <table className="table table-striped table-bordered mb-0">
                 <thead className="table-primary">
@@ -54,7 +66,6 @@ const AreaList = () => {
                     <th style={{ width: "100px" }}>ID</th>
                     <th>Nombre de la Dependencia</th>
                     <th>Descripción / Función</th>
-                    {/* Solo mostramos la columna de Acciones si tiene permisos */}
                     {(isSuperAdmin || isAdmin) && <th className="text-center">Acciones</th>}
                   </tr>
                 </thead>
@@ -71,8 +82,6 @@ const AreaList = () => {
                         <td>{area.id}</td>
                         <td className="fw-bold">{area.name}</td>
                         <td>{area.description || "Sin descripción disponible"}</td>
-              
-                        {/* Renderizado condicional de botones Editar/Eliminar */}
                         {(isSuperAdmin || isAdmin) && (
                           <td className="text-center">
                             <div className="d-flex justify-content-center gap-2">
@@ -107,8 +116,6 @@ const AreaList = () => {
             </div>
           </div>
         </div>
-
-        {/* Renderizado condicional del botón Registrar Nueva Área */}
         {(isSuperAdmin || isAdmin) && (
           <div className="d-flex justify-content-end mt-4">
             <button 
@@ -120,7 +127,6 @@ const AreaList = () => {
           </div>
         )}
       </div>
-
       <ModalsArea 
         show={modalConfig.show}
         mode={modalConfig.mode}
