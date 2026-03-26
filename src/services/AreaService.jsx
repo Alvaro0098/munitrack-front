@@ -46,7 +46,15 @@ export const DeleteArea = async (id) => {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
     });
-    if (!response.ok) throw new Error("No se pudo eliminar el área municipal.");
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        // Respuesta 409 Conflict = Área tiene incidencias vinculadas
+        if (response.status === 409) {
+            throw new Error(errorText || "No se puede eliminar esta área porque tiene incidencias vinculadas");
+        }
+        throw new Error(errorText || "No se pudo eliminar el área municipal.");
+    }
     return true;
 };
 
