@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Toast, ToastContainer } from "react-bootstrap";
 import TopBar from "../topBar/TopBar";
 import { useAuth } from "../../hooks/useAuth";
 import OperatorModals from "./ModalsOperator"; 
@@ -12,6 +13,8 @@ const OperatorList = () => {
     mode: null, 
     data: null  
   });
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   const cargarDatos = async () => {
     try {
@@ -31,6 +34,7 @@ const OperatorList = () => {
       if (modalConfig.mode === "delete") {
         // En modo delete, formDataOrDni es el DNI
         await DeleteOperator(formDataOrDni);
+        setToastMessage("¡Operador eliminado exitosamente!");
       } else {
         // Lógica de Create/Update original intacta
         const processedData = {
@@ -42,18 +46,30 @@ const OperatorList = () => {
 
         if (modalConfig.mode === "create") {
           await CreateOperator(processedData);
+          setToastMessage("¡Operador creado exitosamente!");
         } else if (modalConfig.mode === "edit") {
           await UpdateOperator(modalConfig.data.dni, processedData);
+          setToastMessage("¡Operador actualizado exitosamente!");
         }
       }
       
+      setShowSuccessToast(true);
       await cargarDatos(); 
       handleCloseModal();
-    } catch (error) { 
-      alert(error.status === 403 
-        ? "Acceso Denegado: Permisos insuficientes." 
-        : "Error: " + error.message); 
+    } catch (error) {
+      // ⚠️ Los errores 400/409 (validación) se manejan en ModalsOperator.jsx
+      // Solo relanzar para que useForm pueda procesarlos
+      // El padre NO debe interrumpir con alert() porque el hijo lo capturará
+      throw error;
     }
+  };
+
+  /**
+   * Callback para errores no manejables en el formulario (DNI duplicado sí se maneja)
+   * Se ejecuta si el backend retorna un error que no es DNI duplicado
+   */
+  const handleServerError = (error) => {
+    alert("Error: " + (error?.message || "No se pudo completar la operación"));
   };
 
   const handleOpenCreate = () => setModalConfig({ show: true, mode: "create", data: null });
@@ -64,6 +80,23 @@ const OperatorList = () => {
   return (
     <div className="main-bg-overlay">
       <TopBar />
+      <ToastContainer position="top-end" className="p-3">
+        <Toast 
+          onClose={() => setShowSuccessToast(false)} 
+          show={showSuccessToast} 
+          delay={3000} 
+          autohide
+          className="border-0 shadow"
+        >
+          <Toast.Header closeButton className="bg-success text-white border-0">
+            <i className="bi bi-check-circle me-2"></i>
+            <strong className="me-auto">Éxito</strong>
+          </Toast.Header>
+          <Toast.Body className="bg-light">
+            {toastMessage}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
       <div className="container mt-4">
         <div className="card shadow rounded bg-white">
           <div className="card-body">
@@ -136,7 +169,8 @@ const OperatorList = () => {
         mode={modalConfig.mode}
         operatorData={modalConfig.data}
         onClose={handleCloseModal}
-        onConfirm={handleConfirmAction} 
+        onConfirm={handleConfirmAction}
+        onError={handleServerError}
       />
     </div>
   );

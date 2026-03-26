@@ -5,17 +5,6 @@ const OPERATOR_URL = API_URL;
 export const CreateOperator = async (operatorData) => { 
     const token = localStorage.getItem("token");
     
-    // 1. Traducción de cargos a los números que probaste en Swagger
-    // let positionId;
-    // switch (operatorData.Position) {
-    //     case "Admin": positionId = 1; break;
-    //     case "SysAdmin": positionId = 2; break;
-    //     case "Basic": positionId = 0; break; // En Swagger usaste 0
-    //     default: positionId = 0;
-    // }
-    
-    // 2. Creamos el objeto EXACTAMENTE como lo viste en Swagger
-    // IMPORTANTE: Todo en minúsculas (dni, name, lastName, etc.)
     const payload = {
         dni: Number(operatorData.DNI),
         name: String(operatorData.Name),
@@ -24,9 +13,8 @@ export const CreateOperator = async (operatorData) => {
         password: String(operatorData.Password || "Password123!"), 
         phone: String(operatorData.Phone),
         email: String(operatorData.Email),
-        position: Number(operatorData.position) // 0, 1 o 2
+        position: Number(operatorData.position)
     };
-
 
     const response = await fetch(`${OPERATOR_URL}/api/Operator`, { 
         method: "POST",
@@ -37,7 +25,23 @@ export const CreateOperator = async (operatorData) => {
         body: JSON.stringify(payload),
     });
 
-    if (!response.ok) throw new Error(await response.text());
+    if (!response.ok) {
+        // Clonar la respuesta antes de leerla para evitar "body stream already read"
+        const responseClone = response.clone();
+        
+        let errorMessage;
+        try {
+            // Intentar parsear como JSON desde la respuesta original
+            const jsonError = await response.json();
+            errorMessage = jsonError.message || jsonError.detail || JSON.stringify(jsonError);
+        } catch {
+            // Si falla el parseo JSON, leer como texto desde el clone
+            errorMessage = await responseClone.text();
+        }
+        
+        throw new Error(errorMessage);
+    }
+    
     return await response.json(); 
 };
 
@@ -85,7 +89,6 @@ export const DeleteOperator = async (dni) => {
 export const UpdateOperator = async (dni, formData) => {
     const token = localStorage.getItem("token");
     
-    // CORRECCIÓN: Nombres sincronizados con el Modal
     const payload = {
         name: String(formData.Name),
         lastName: String(formData.LastName),
@@ -105,6 +108,22 @@ export const UpdateOperator = async (dni, formData) => {
         body: JSON.stringify(payload),
     });
 
-    if (!response.ok) throw new Error(await response.text() || "Error al actualizar");
+    if (!response.ok) {
+        // Clonar la respuesta antes de leerla para evitar "body stream already read"
+        const responseClone = response.clone();
+        
+        let errorMessage;
+        try {
+            // Intentar parsear como JSON desde la respuesta original
+            const jsonError = await response.json();
+            errorMessage = jsonError.message || jsonError.detail || JSON.stringify(jsonError);
+        } catch {
+            // Si falla el parseo JSON, leer como texto desde el clone
+            errorMessage = await responseClone.text() || "Error al actualizar";
+        }
+        
+        throw new Error(errorMessage);
+    }
+    
     return response.status === 204 ? { success: true } : await response.json(); 
 };

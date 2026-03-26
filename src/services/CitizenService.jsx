@@ -6,7 +6,7 @@ export const CreateCitizen = async (citizenData) => {
     const token = localStorage.getItem("token");
 
     const payload = {
-        DNI: Number(citizenData.DNI),      // Asegúrate que los nombres coincidan con el Modal
+        DNI: Number(citizenData.DNI),
         Name: citizenData.Name,
         LastName: citizenData.LastName,
         Email: citizenData.Email,
@@ -18,14 +18,25 @@ export const CreateCitizen = async (citizenData) => {
         method: "POST",
         headers: { 
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}` // <--- ESTO ES LO QUE TE FALTA EN NETWORK
+            "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify(payload), 
     });
 
     if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || `Error ${response.status}: No autorizado o datos inválidos`);
+        // Clonar la respuesta antes de leerla para evitar "body stream already read"
+        const responseClone = response.clone();
+        
+        let errorMessage;
+        try {
+            // Intentar parsear como JSON desde la respuesta original
+            const jsonError = await response.json();
+            errorMessage = jsonError.message || jsonError.detail || JSON.stringify(jsonError);
+        } catch {
+            // Si falla el parseo JSON, leer como texto desde el clone
+            errorMessage = await responseClone.text();
+        }
+        throw new Error(errorMessage);
     }
 
     return await response.json(); 
@@ -81,5 +92,45 @@ export const GetCitizenByDni = async (dni) => {
     if (response.status === 404) return null; // Ciudadano no encontrado
     if (!response.ok) throw new Error("Error en la búsqueda");
     
+    return await response.json();
+};
+
+export const UpdateCitizen = async (dni, citizenData) => {
+    const token = localStorage.getItem("token");
+
+    const payload = {
+        DNI: Number(citizenData.DNI),
+        Name: citizenData.Name,
+        LastName: citizenData.LastName,
+        Email: citizenData.Email,
+        Adress: citizenData.Adress,
+        Phone: citizenData.Phone
+    };
+
+    const response = await fetch(`${API_URL}/api/Citizen/${dni}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+        // Clonar la respuesta antes de leerla para evitar "body stream already read"
+        const responseClone = response.clone();
+        
+        let errorMessage;
+        try {
+            // Intentar parsear como JSON desde la respuesta original
+            const jsonError = await response.json();
+            errorMessage = jsonError.message || jsonError.detail || JSON.stringify(jsonError);
+        } catch {
+            // Si falla el parseo JSON, leer como texto desde el clone
+            errorMessage = await responseClone.text();
+        }
+        throw new Error(errorMessage);
+    }
+
     return await response.json();
 };

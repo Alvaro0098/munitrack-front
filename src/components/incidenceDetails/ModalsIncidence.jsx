@@ -5,19 +5,40 @@ import { useForm } from "../../hooks/useForm";
 
 const ModalsIncidence = ({ show, mode, incidenceData, onClose, onConfirm }) => {
   const [areas, setAreas] = useState([]);
+  const [initialFormState, setInitialFormState] = useState(null);
 
   const validateIncidence = (values) => {
     const errors = {};
-    if (!values.area || values.area === "") {
+    
+    // Fecha
+    if (!values.fecha) {
+      errors.fecha = "La fecha es obligatoria.";
+    } else {
+      const selectedDate = new Date(values.fecha);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+      if (selectedDate > today) {
+        errors.fecha = "No se permite registrar incidencias en el futuro.";
+      }
+    }
+    
+    // Área
+    if (!values.area || values.area === "" || values.area === "0") {
       errors.area = "El área responsable es obligatoria.";
     }
+    
+    // Observación con máximo
     if (!values.observacion || values.observacion.length < 10) {
       errors.observacion = "La observación debe tener al menos 10 caracteres.";
+    } else if (values.observacion.length > 500) {
+      errors.observacion = "La observación no puede superar 500 caracteres.";
     }
+    
     return errors;
   };
 
-  const { formData, setFormData, errors, handleChange, handleSubmit } = useForm({
+  const { formData, setFormData, errors, handleChange, handleSubmit, clearErrors } = useForm({
     fecha: "",
     tipo: "0",
     estado: "0",
@@ -40,25 +61,46 @@ const ModalsIncidence = ({ show, mode, incidenceData, onClose, onConfirm }) => {
 
   useEffect(() => {
     if (show && mode !== "delete") {
+      clearErrors();
       if (mode === "edit" && incidenceData) {
-        setFormData({
+        const initialData = {
           fecha: incidenceData.date ? incidenceData.date.split('T')[0] : "",
           tipo: incidenceData.incidenceType?.toString() || "0",
           estado: incidenceData.state?.toString() || "0",
           area: incidenceData.areaId?.toString() || "",
           observacion: incidenceData.description || ""
-        });
+        };
+        setFormData(initialData);
+        setInitialFormState(initialData);
       } else {
-        setFormData({ 
+        const initialData = { 
           fecha: new Date().toISOString().split('T')[0], 
           tipo: "0", 
           estado: "0", 
           area: "", 
           observacion: "" 
-        });
+        };
+        setFormData(initialData);
+        setInitialFormState(initialData);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, incidenceData, show, setFormData]);
+
+  const hasLocalChanges = () => {
+    if (mode !== "edit" || !initialFormState) return true;
+    return JSON.stringify(formData) !== JSON.stringify(initialFormState);
+  };
+
+  const handleConfirmIncidence = async (formDataValues) => {
+    // En modo edit, validar que haya cambios reales
+    if (mode === "edit" && !hasLocalChanges()) {
+      console.log("No hay cambios en la incidencia");
+      onClose();
+      return;
+    }
+    await onConfirm(formDataValues);
+  };
 
   const renderFormModal = () => (
     <Modal show={show} onHide={onClose} centered size="lg">
@@ -135,7 +177,7 @@ const ModalsIncidence = ({ show, mode, incidenceData, onClose, onConfirm }) => {
       </Modal.Body>
       <Modal.Footer className="border-0">
         <Button variant="light" onClick={onClose}>Cancelar</Button>
-        <Button variant="primary" onClick={() => handleSubmit(onConfirm)}>
+        <Button variant="primary" onClick={() => handleSubmit(handleConfirmIncidence)}>
           {mode === "create" ? "Guardar" : "Actualizar"}
         </Button>
       </Modal.Footer>

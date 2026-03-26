@@ -18,7 +18,17 @@ const CitizenSearch = () => {
     // Bloqueo físico: No permite escribir más de 8 caracteres
     if (value.length <= 8) {
       setDni(value);
+      // Limpiar resultado anterior cuando el usuario modifica el input
+      setCitizen(null);
+      setError(null);
     }
+  };
+
+  const handleClear = () => {
+    setDni("");
+    setCitizen(null);
+    setError(null);
+    setLoading(false);
   };
 
   const handleSearch = async (e) => {
@@ -88,6 +98,15 @@ const CitizenSearch = () => {
                         disabled={loading || dni.length < 6}
                       >
                         {loading ? <Spinner size="sm" animation="border" /> : <Search size={18} />}
+                      </Button>
+                      <Button 
+                        type="button"
+                        variant="outline-secondary"
+                        onClick={handleClear}
+                        disabled={loading || (dni === "" && !citizen && !error)}
+                        title="Limpiar búsqueda"
+                      >
+                        <i className="bi bi-x-circle"></i>
                       </Button>
                       <Form.Control.Feedback type="invalid">
                         El DNI debe tener entre 6 y 8 dígitos.

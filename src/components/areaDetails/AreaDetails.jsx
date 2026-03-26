@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Toast, ToastContainer } from "react-bootstrap";
 import TopBar from "../topBar/TopBar";
 import { useAuth } from "../../hooks/useAuth";
 import ModalsArea from "./ModalsArea"; 
@@ -9,6 +10,8 @@ const AreaList = () => {
   const { isSuperAdmin, isAdmin } = useAuth();
   const [loading, setLoading] = useState(true);
   const [modalConfig, setModalConfig] = useState({ show: false, mode: null, data: null });
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   const cargarDatos = async () => {
     setLoading(true);
@@ -39,12 +42,16 @@ const AreaList = () => {
     try {
       if (modalConfig.mode === "delete") {
         await DeleteArea(modalConfig.data.id);
+        setToastMessage("¡Área eliminada exitosamente!");
       } else if (modalConfig.mode === "create") {
         await CreateArea(formData);
+        setToastMessage("¡Área creada exitosamente!");
       } else if (modalConfig.mode === "edit") {
         await UpdateArea(modalConfig.data.id, formData);
+        setToastMessage("¡Área actualizada exitosamente!");
       }
       
+      setShowSuccessToast(true);
       await cargarDatos();
       handleCloseModal();
     } catch (error) {
@@ -55,6 +62,23 @@ const AreaList = () => {
   return (
     <div className="main-bg-overlay">
       <TopBar />
+      <ToastContainer position="top-end" className="p-3">
+        <Toast 
+          onClose={() => setShowSuccessToast(false)} 
+          show={showSuccessToast} 
+          delay={3000} 
+          autohide
+          className="border-0 shadow"
+        >
+          <Toast.Header closeButton className="bg-success text-white border-0">
+            <i className="bi bi-check-circle me-2"></i>
+            <strong className="me-auto">Éxito</strong>
+          </Toast.Header>
+          <Toast.Body className="bg-light">
+            {toastMessage}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
       <div className="container mt-4">
         <div className="card shadow rounded bg-white">
           <div className="card-body">

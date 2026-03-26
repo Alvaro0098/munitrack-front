@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export const useForm = (initialState, validate) => {
   const [formData, setFormData] = useState(initialState);
   const [errors, setErrors] = useState({});
+  const initialDataRef = useRef(initialState);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -10,16 +11,62 @@ export const useForm = (initialState, validate) => {
     if (errors[name]) setErrors({ ...errors, [name]: null });
   };
 
-  const handleSubmit = (onSuccess) => {
+  /**
+   * Validar y enviar formulario
+   * @param {function} onSuccess - Callback ejecutado si validación pasa
+   * @param {function} onError - (Opcional) Callback ejecutado si onSuccess falla
+   */
+  const handleSubmit = async (onSuccess, onError) => {
     const validationErrors = validate(formData);
     if (Object.keys(validationErrors).length === 0) {
-      onSuccess(formData);
+      try {
+        await onSuccess(formData);
+      } catch (error) {
+        // Si onSuccess falla y hay un callback onError, ejecutarlo
+        if (onError) {
+          onError(error, setServerErrors);
+        } else {
+          // Si no hay handler de error, relanzar
+          throw error;
+        }
+      }
     } else {
       setErrors(validationErrors);
     }
   };
 
-  return { formData, setFormData, errors, handleChange, handleSubmit };
+  /**
+   * Setear errores desde el servidor (ej: DNI duplicado)
+   * @param {object} serverErrors - Objeto con errores del servidor { DNI: "Ya existe...", Email: "..." }
+   */
+  const setServerErrors = (serverErrors) => {
+    setErrors((prevErrors) => ({ ...prevErrors, ...serverErrors }));
+  };
+
+  /**
+   * Limpiar todos los errores del formulario
+   */
+  const clearErrors = () => {
+    setErrors({});
+  };
+
+  /**
+   * Guardar el estado actual del formulario como "inicial" (para detectar cambios)
+   * Se usa cuando se carga data para edición
+   */
+  const saveInitialState = () => {
+    initialDataRef.current = { ...formData };
+  };
+
+  /**
+   * Detectar si el formulario fue modificado respecto al estado inicial
+   * @returns {boolean} true si hay cambios, false si es igual al inicial
+   */
+  const hasChanges = () => {
+    return JSON.stringify(formData) !== JSON.stringify(initialDataRef.current);
+  };
+
+  return { formData, setFormData, errors, handleChange, handleSubmit, setServerErrors, clearErrors, saveInitialState, hasChanges };
 };
 
 //headless ui

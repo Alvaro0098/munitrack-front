@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom"; // Importante para la navegación SPA
+import { Toast, ToastContainer } from "react-bootstrap";
 import { Search } from "lucide-react"; // Icono coherente con el buscador
 import TopBar from "../topBar/TopBar";
 import CitizenModals from "./ModalsCitizen";
-import { GetCitizens, DeleteCitizen } from "../../services/CitizenService";
+import { GetCitizens, DeleteCitizen, CreateCitizen, UpdateCitizen } from "../../services/CitizenService";
 
 const CitizenList = () => {
   const [citizens, setCitizens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalConfig, setModalConfig] = useState({ show: false, mode: null, data: null });
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   const cargarDatos = async () => {
     setLoading(true);
@@ -34,21 +37,55 @@ const CitizenList = () => {
     setModalConfig({ show: false, mode: null, data: null });
   };
 
-  const handleConfirmAction = async (dni) => {
+  const handleConfirmAction = async (formDataOrDni) => {
     try {
       if (modalConfig.mode === "delete") {
-        await DeleteCitizen(dni);
+        await DeleteCitizen(formDataOrDni);
+        setToastMessage("¡Ciudadano eliminado exitosamente!");
+      } else if (modalConfig.mode === "create") {
+        await CreateCitizen(formDataOrDni);
+        setToastMessage("¡Ciudadano creado exitosamente!");
+      } else if (modalConfig.mode === "edit") {
+        await UpdateCitizen(modalConfig.data.dni, formDataOrDni);
+        setToastMessage("¡Ciudadano actualizado exitosamente!");
       }
+      
+      setShowSuccessToast(true);
+      await cargarDatos();
       handleCloseModal();
-      cargarDatos();
     } catch (error) {
-      alert("Error en la operación: " + error.message);
+      throw error;
     }
+  };
+
+  /**
+   * Callback para errores no manejables en el formulario (DNI duplicado sí se maneja)
+   * Se ejecuta si el backend retorna un error que no es DNI duplicado
+   */
+  const handleServerError = (error) => {
+    alert("Error: " + (error?.message || "No se pudo completar la operación"));
   };
 
   return (
     <div className="main-bg-clean">
       <TopBar />
+      <ToastContainer position="top-end" className="p-3">
+        <Toast 
+          onClose={() => setShowSuccessToast(false)} 
+          show={showSuccessToast} 
+          delay={3000} 
+          autohide
+          className="border-0 shadow"
+        >
+          <Toast.Header closeButton className="bg-success text-white border-0">
+            <i className="bi bi-check-circle me-2"></i>
+            <strong className="me-auto">Éxito</strong>
+          </Toast.Header>
+          <Toast.Body className="bg-light">
+            {toastMessage}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
       <div className="container mt-4">
         {loading ? (
           <div className="text-center py-5">
@@ -128,7 +165,8 @@ const CitizenList = () => {
         mode={modalConfig.mode} 
         citizenData={modalConfig.data} 
         onClose={handleCloseModal} 
-        onConfirm={handleConfirmAction} 
+        onConfirm={handleConfirmAction}
+        onError={handleServerError}
       />
     </div>
   );
