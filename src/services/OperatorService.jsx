@@ -5,6 +5,13 @@ const OPERATOR_URL = API_URL;
 export const CreateOperator = async (operatorData) => { 
     const token = localStorage.getItem("token");
     
+    // Mapeo de numbers a enum names
+    const positionMap = {
+        "0": "OperatorBasic",
+        "1": "Admin",
+        "2": "SysAdmin"
+    };
+    
     const payload = {
         dni: Number(operatorData.DNI),
         name: String(operatorData.Name),
@@ -13,7 +20,7 @@ export const CreateOperator = async (operatorData) => {
         password: String(operatorData.Password || "Password123!"), 
         phone: String(operatorData.Phone),
         email: String(operatorData.Email),
-        position: Number(operatorData.position)
+        position: positionMap[String(operatorData.position)] || "OperatorBasic"
     };
 
     const response = await fetch(`${OPERATOR_URL}/api/Operator`, { 
@@ -89,14 +96,22 @@ export const DeleteOperator = async (dni) => {
 export const UpdateOperator = async (dni, formData) => {
     const token = localStorage.getItem("token");
     
+    // Mapeo de numbers a enum names
+    const positionMap = {
+        "0": "OperatorBasic",
+        "1": "Admin",
+        "2": "SysAdmin"
+    };
+    
     const payload = {
         name: String(formData.Name),
         lastName: String(formData.LastName),
-        nLegajo: Number(formData.NLegajo),
-        password: String(formData.Password || "Password123!"), 
-        phone: String(formData.Phone),
         email: String(formData.Email),
-        position: Number(formData.position)
+        // Solo incluir password si se proporciona (no vacío)
+        ...(formData.Password && formData.Password.trim().length > 0 && { password: String(formData.Password) }),
+        // Phone es opcional
+        ...(formData.Phone && formData.Phone.trim().length > 0 && { phone: String(formData.Phone) }),
+        position: positionMap[String(formData.position)] || "OperatorBasic"
     };
 
     const response = await fetch(`${OPERATOR_URL}/api/Operator/${dni}`, { 

@@ -99,7 +99,6 @@ export const UpdateCitizen = async (dni, citizenData) => {
     const token = localStorage.getItem("token");
 
     const payload = {
-        DNI: Number(citizenData.DNI),
         Name: citizenData.Name,
         LastName: citizenData.LastName,
         Email: citizenData.Email,

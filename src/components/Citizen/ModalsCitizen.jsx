@@ -24,8 +24,8 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
       errors.dni = "El DNI debe ser un número positivo (no se aceptan negativos).";
     } else if (!onlyNumbers.test(values.dni.toString())) {
       errors.dni = "El DNI solo puede contener números.";
-    } else if (values.dni.toString().length > 10) {
-      errors.dni = "El DNI no puede tener más de 10 dígitos.";
+    } else if (values.dni.toString().length < 7 || values.dni.toString().length > 8) {
+      errors.dni = "El DNI debe tener entre 7 y 8 dígitos.";
     }
     if (!values.mail || values.mail.trim().length === 0) {
       errors.mail = "El email es obligatorio.";
@@ -163,10 +163,19 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
             <div className="col-md-6 mb-3">
               <Form.Label>DNI</Form.Label>
               <Form.Control 
+                type="number"
                 name="dni" 
                 value={formData.dni} 
-                onChange={handleChange} 
+                onChange={(e) => {
+                  // Limitar a 8 dígitos
+                  const value = e.target.value;
+                  if (value.length <= 8) {
+                    handleChange(e);
+                  }
+                }} 
                 isInvalid={!!errors.dni}
+                readOnly={mode === "edit"}
+                maxLength="8"
               />
               <Form.Control.Feedback type="invalid">{errors.dni}</Form.Control.Feedback>
             </div>

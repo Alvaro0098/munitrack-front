@@ -15,8 +15,8 @@ const OperatorModals = ({ show, mode, operatorData, onClose, onConfirm, onError 
       errors.DNI = "El DNI debe ser un número positivo (no se aceptan negativos).";
     } else if (!onlyNumbers.test(values.DNI.toString())) {
       errors.DNI = "El DNI solo puede contener números.";
-    } else if (values.DNI.toString().length > 10) {
-      errors.DNI = "El DNI no puede tener más de 10 dígitos.";
+    } else if (values.DNI.toString().length < 7 || values.DNI.toString().length > 8) {
+      errors.DNI = "El DNI debe tener entre 7 y 8 dígitos.";
     }
     if (!values.NLegajo) {
       errors.NLegajo = "El N° de Legajo es obligatorio.";
@@ -64,7 +64,7 @@ const OperatorModals = ({ show, mode, operatorData, onClose, onConfirm, onError 
     const errorMessage = error?.message || error?.response?.data?.message || '';
     const msg = errorMessage.toLowerCase();
     
-    // Detectar error de N° de Legajo (minúsculas para ser robusto)
+    // Detectar error de N° de Legajo duplicado
     if (msg.includes('legajo')) {
       // ✅ Setear el error en el campo NLegajo usando la función del hook
       setServerErrors({ NLegajo: 'Este N° de Legajo ya está registrado. Por favor, ingresá uno nuevo.' });
@@ -131,12 +131,32 @@ const OperatorModals = ({ show, mode, operatorData, onClose, onConfirm, onError 
           <div className="row">
             <div className="col-md-6 mb-3">
               <Form.Label className="fw-semibold">DNI</Form.Label>
-              <Form.Control type="number" name="DNI" value={formData.DNI} onChange={handleChange} isInvalid={!!errors.DNI} />
+              <Form.Control 
+                type="number" 
+                name="DNI" 
+                value={formData.DNI} 
+                onChange={(e) => {
+                  // Limitar a 8 dígitos
+                  const value = e.target.value;
+                  if (value.length <= 8) {
+                    handleChange(e);
+                  }
+                }} 
+                isInvalid={!!errors.DNI} 
+                readOnly={mode === "edit"} 
+                maxLength="8"
+              />
               <Form.Control.Feedback type="invalid">{errors.DNI}</Form.Control.Feedback>
             </div>
             <div className="col-md-6 mb-3">
               <Form.Label className="fw-semibold">N° Legajo</Form.Label>
-              <Form.Control type="number" name="NLegajo" value={formData.NLegajo} onChange={handleChange} isInvalid={!!errors.NLegajo} />
+              <Form.Control type="number" name="NLegajo" value={formData.NLegajo} onChange={(e) => {
+                // Limitar a 8 dígitos
+                const value = e.target.value;
+                if (value.length <= 8) {
+                  handleChange(e);
+                }
+              }} isInvalid={!!errors.NLegajo} readOnly={mode === "edit"} maxLength="8" />
               <Form.Control.Feedback type="invalid">{errors.NLegajo}</Form.Control.Feedback>
             </div>
           </div>
