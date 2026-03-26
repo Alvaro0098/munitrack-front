@@ -120,7 +120,7 @@ const ModalsArea = ({ show, mode, areaData, onClose, onConfirm }) => {
         <h5 className="mt-3 fw-bold">¿Eliminar Área?</h5>
         <p className="text-muted">
           Se borrará: <br />
-          <b className="text-dark">{formData.titulo}</b>
+          <b className="text-dark">{areaData?.name || "Sin nombre"}</b>
           <br />
           <small className="text-secondary">(ID: {areaData?.id})</small>
         </p>
