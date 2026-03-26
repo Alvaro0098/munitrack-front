@@ -83,12 +83,12 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
       clearErrors();
       if (mode === "edit" && citizenData) {
         const initialData = {
-          nombre: citizenData.name || "",
-          apellido: citizenData.lastName || "",
-          dni: citizenData.dni?.toString() || "",
-          mail: citizenData.email || "",
-          direccion: citizenData.adress || "",
-          celular: citizenData.phone || ""
+          nombre: citizenData.Name || citizenData.name || "",
+          apellido: citizenData.LastName || citizenData.lastName || "",
+          dni: citizenData.DNI?.toString() || citizenData.dni?.toString() || "",
+          mail: citizenData.Email || citizenData.email || "",
+          direccion: citizenData.Adress || citizenData.adress || "",
+          celular: citizenData.Phone || citizenData.phone || ""
         };
         setFormData(initialData);
         setInitialFormState(initialData);
@@ -145,6 +145,7 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
                 value={formData.nombre} 
                 onChange={handleChange} 
                 isInvalid={!!errors.nombre}
+                maxLength="100"
               />
               <Form.Control.Feedback type="invalid">{errors.nombre}</Form.Control.Feedback>
             </div>
@@ -155,6 +156,7 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
                 value={formData.apellido} 
                 onChange={handleChange} 
                 isInvalid={!!errors.apellido}
+                maxLength="100"
               />
               <Form.Control.Feedback type="invalid">{errors.apellido}</Form.Control.Feedback>
             </div>
@@ -186,6 +188,7 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
                 value={formData.celular} 
                 onChange={handleChange} 
                 isInvalid={!!errors.celular}
+                maxLength="10"
               />
               <Form.Control.Feedback type="invalid">{errors.celular}</Form.Control.Feedback>
             </div>
@@ -199,6 +202,7 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
                 value={formData.mail} 
                 onChange={handleChange} 
                 isInvalid={!!errors.mail}
+                maxLength="256"
               />
               <Form.Control.Feedback type="invalid">{errors.mail}</Form.Control.Feedback>
             </div>
@@ -209,6 +213,7 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
                 value={formData.direccion} 
                 onChange={handleChange} 
                 isInvalid={!!errors.direccion}
+                maxLength="200"
               />
               <Form.Control.Feedback type="invalid">{errors.direccion}</Form.Control.Feedback>
             </div>
