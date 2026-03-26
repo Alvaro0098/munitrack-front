@@ -1,5 +1,5 @@
-//const API_URL = "https://munitrack-a3gcd3gqctffeeb0.eastus-01.azurewebsites.net/api/Authentication";
-const API_URL = "http://localhost:5216/api/Authentication";
+const API_URL = "https://munitrack-a3gcd3gqctffeeb0.eastus-01.azurewebsites.net/api/Authentication";
+// const API_URL = "http://localhost:5216/api/Authentication";
 
 export const loginService = async ({ nLegajo, password }) => { 
     const response = await fetch(`${API_URL}/authenticate`, {
