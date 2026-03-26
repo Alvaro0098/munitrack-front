@@ -15,8 +15,8 @@ const OperatorModals = ({ show, mode, operatorData, onClose, onConfirm, onError 
       errors.DNI = "El DNI debe ser un número positivo (no se aceptan negativos).";
     } else if (!onlyNumbers.test(values.DNI.toString())) {
       errors.DNI = "El DNI solo puede contener números.";
-    } else if (values.DNI.toString().length > 8) {
-      errors.DNI = "El DNI no puede superar los 8 dígitos.";
+    } else if (values.DNI.toString().length > 10) {
+      errors.DNI = "El DNI no puede tener más de 10 dígitos.";
     }
     if (!values.NLegajo) {
       errors.NLegajo = "El N° de Legajo es obligatorio.";
@@ -35,8 +35,8 @@ const OperatorModals = ({ show, mode, operatorData, onClose, onConfirm, onError 
         errors.Phone = "El celular debe ser un número positivo (no se aceptan negativos).";
       } else if (!onlyNumbers.test(values.Phone.toString())) {
         errors.Phone = "El celular solo puede contener números.";
-      } else if (values.Phone.length > 8) {
-        errors.Phone = "El celular no puede tener más de 8 dígitos.";
+      } else if (values.Phone.length > 10) {
+        errors.Phone = "El celular no puede tener más de 10 dígitos.";
       }
     }
     if (!values.Email) {

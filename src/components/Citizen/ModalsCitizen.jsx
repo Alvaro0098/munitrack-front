@@ -24,6 +24,8 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
       errors.dni = "El DNI debe ser un número positivo (no se aceptan negativos).";
     } else if (!onlyNumbers.test(values.dni.toString())) {
       errors.dni = "El DNI solo puede contener números.";
+    } else if (values.dni.toString().length > 10) {
+      errors.dni = "El DNI no puede tener más de 10 dígitos.";
     }
     if (!values.mail || values.mail.trim().length === 0) {
       errors.mail = "El email es obligatorio.";
@@ -39,6 +41,8 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
       errors.celular = "El celular debe ser un número positivo (no se aceptan negativos).";
     } else if (!onlyNumbers.test(values.celular.trim())) {
       errors.celular = "El celular solo puede contener números.";
+    } else if (values.celular.trim().length > 10) {
+      errors.celular = "El celular no puede tener más de 10 dígitos.";
     }
 
     return errors;
