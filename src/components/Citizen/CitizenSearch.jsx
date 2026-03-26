@@ -34,9 +34,9 @@ const CitizenSearch = () => {
   const handleSearch = async (e) => {
     e.preventDefault();
     
-    // Validación de longitud mínima (Regla de negocio) 
-    if (dni.length < 6) {
-      setError("El DNI debe tener al menos 6 dígitos.");
+    // Validación de longitud mínima (Regla de negocio) - 7-8 dígitos
+    if (dni.length < 7 || dni.length > 8) {
+      setError("El DNI debe tener entre 7 y 8 dígitos.");
       return;
     }
 
@@ -88,14 +88,15 @@ const CitizenSearch = () => {
                         type="number"
                         value={dni}
                         onChange={handleDniChange}
+                        maxLength="8"
                         // Evita caracteres científicos y símbolos
                         onKeyDown={(e) => ["e", "E", "+", "-", "."].includes(e.key) && e.preventDefault()}
-                        isInvalid={dni.length > 0 && dni.length < 6}
+                        isInvalid={dni.length > 0 && (dni.length < 7 || dni.length > 8)}
                       />
                       <Button 
                         type="submit" 
                         className="btn-action-teal" // Clase de tu archivo de estilos principal
-                        disabled={loading || dni.length < 6}
+                        disabled={loading || dni.length < 7 || dni.length > 8}
                       >
                         {loading ? <Spinner size="sm" animation="border" /> : <Search size={18} />}
                       </Button>
@@ -109,13 +110,13 @@ const CitizenSearch = () => {
                         <i className="bi bi-x-circle"></i>
                       </Button>
                       <Form.Control.Feedback type="invalid">
-                        El DNI debe tener entre 6 y 8 dígitos.
+                        El DNI debe tener entre 7 y 8 dígitos.
                       </Form.Control.Feedback>
                     </InputGroup>
                     
                     {/* Feedback visual de longitud  */}
                     <div className="d-flex justify-content-end mt-1">
-                      <small className={dni.length >= 6 ? "text-success fw-bold" : "text-muted"}>
+                      <small className={dni.length >= 7 && dni.length <= 8 ? "text-success fw-bold" : "text-muted"}>
                         {dni.length} / 8 dígitos
                       </small>
                     </div>
