@@ -14,7 +14,9 @@ const OperatorList = () => {
     data: null  
   });
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const cargarDatos = async () => {
     try {
@@ -57,10 +59,8 @@ const OperatorList = () => {
       await cargarDatos(); 
       handleCloseModal();
     } catch (error) {
-      // ⚠️ Los errores 400/409 (validación) se manejan en ModalsOperator.jsx
-      // Solo relanzar para que useForm pueda procesarlos
-      // El padre NO debe interrumpir con alert() porque el hijo lo capturará
-      throw error;
+      setErrorMessage(error.message);
+      setShowErrorToast(true);
     }
   };
 
@@ -94,6 +94,21 @@ const OperatorList = () => {
           </Toast.Header>
           <Toast.Body className="bg-light">
             {toastMessage}
+          </Toast.Body>
+        </Toast>
+        <Toast 
+          onClose={() => setShowErrorToast(false)} 
+          show={showErrorToast} 
+          delay={5000} 
+          autohide
+          className="border-0 shadow"
+        >
+          <Toast.Header closeButton className="bg-danger text-white border-0">
+            <i className="bi bi-exclamation-circle me-2"></i>
+            <strong className="me-auto">Error</strong>
+          </Toast.Header>
+          <Toast.Body className="bg-light text-danger">
+            {errorMessage}
           </Toast.Body>
         </Toast>
       </ToastContainer>

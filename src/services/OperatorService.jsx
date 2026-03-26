@@ -85,6 +85,10 @@ export const DeleteOperator = async (dni) => {
 
     if (!response.ok) {
         const errorText = await response.text();
+        // Respuesta 409 Conflict = Operador tiene incidencias vinculadas
+        if (response.status === 409) {
+            throw new Error(errorText || "No se puede eliminar este operador porque tiene incidencias vinculadas");
+        }
         throw new Error(errorText || "Error al eliminar el operador");
     }
 
