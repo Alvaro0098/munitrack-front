@@ -41,8 +41,8 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
       errors.celular = "El celular debe ser un número positivo (no se aceptan negativos).";
     } else if (!onlyNumbers.test(values.celular.trim())) {
       errors.celular = "El celular solo puede contener números.";
-    } else if (values.celular.trim().length > 10) {
-      errors.celular = "El celular no puede tener más de 10 dígitos.";
+    } else if (values.celular.trim().length !== 10) {
+      errors.celular = "El celular debe tener exactamente 10 dígitos.";
     }
 
     return errors;

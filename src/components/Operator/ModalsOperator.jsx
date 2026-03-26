@@ -35,8 +35,8 @@ const OperatorModals = ({ show, mode, operatorData, onClose, onConfirm, onError 
         errors.Phone = "El celular debe ser un número positivo (no se aceptan negativos).";
       } else if (!onlyNumbers.test(values.Phone.toString())) {
         errors.Phone = "El celular solo puede contener números.";
-      } else if (values.Phone.length > 10) {
-        errors.Phone = "El celular no puede tener más de 10 dígitos.";
+      } else if (values.Phone.length !== 10) {
+        errors.Phone = "El celular debe tener exactamente 10 dígitos.";
       }
     }
     if (!values.Email) {
