@@ -153,7 +153,6 @@ const ModalsIncidence = ({ show, mode, incidenceData, onClose, onConfirm }) => {
                 name="area" 
                 value={formData.area} 
                 onChange={handleChange}
-                disabled={mode === "edit"}
                 isInvalid={!!errors.area}
               >
                 <option value="">Seleccione un área...</option>

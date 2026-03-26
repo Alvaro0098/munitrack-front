@@ -47,9 +47,14 @@ export const CreateIncidence = async (formData) => {
 
 export const UpdateIncidence = async (id, formData) => {
     const token = localStorage.getItem("token");
+    
+    // MAPEAMOS HACIA EL DTO DE C# - Con todos los campos editables
     const payload = {
-        Description: formData.observacion, // 'observacion' del front -> 'Description' del DTO
-        State: parseInt(formData.estado)    // 'estado' del front -> 'State' del DTO
+        Date: new Date(formData.fecha).toISOString(),
+        IncidenceType: parseInt(formData.tipo),
+        Description: formData.observacion,
+        State: parseInt(formData.estado),
+        AreaId: parseInt(formData.area)
     };
 
     const response = await fetch(`${API_URL}/api/Incidence/${id}`, {
