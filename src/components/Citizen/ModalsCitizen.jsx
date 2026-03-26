@@ -64,9 +64,6 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
   const handleServerError = (error, setServerErrors) => {
     const errorMessage = error?.message || error?.response?.data?.message || '';
     
-    console.log('Error del servidor capturado:', error);
-    console.log('Mensaje de error:', errorMessage);
-    
     // Detectar error de DNI duplicado del backend
     if (errorMessage.includes('Ya existe un ciudadano con DNI')) {
       // ✅ Setear el error en el campo DNI usando la función del hook
@@ -110,7 +107,6 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
     // En modo edit, validar que haya cambios reales
     if (mode === "edit" && !hasLocalChanges()) {
       // No hay cambios, cerrar modal sin hacer nada
-      console.log("No hay cambios en el formulario");
       onClose();
       return;
     }
@@ -252,7 +248,6 @@ const CitizenModals = ({ show, mode, citizenData, onClose, onConfirm, onError })
               } catch (error) {
                 // El error se relanza desde handleConfirmAction
                 // Se puede manejar aquí si es necesario
-                console.error('Error al eliminar:', error);
                 if (onError) {
                   onError(error);
                 }

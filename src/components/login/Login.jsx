@@ -51,7 +51,6 @@ const Login = () => {
         setUser(user); 
       }
 
-      console.log("Login exitoso");
       navigate("/incidence");
 
     } catch (error) {

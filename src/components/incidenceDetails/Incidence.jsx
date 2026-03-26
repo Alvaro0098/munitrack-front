@@ -25,7 +25,7 @@ const IncidenceList = () => {
     try {
       const data = await GetIncidences();
       setIncidences(data);
-    } catch (error) { console.error("Error cargando:", error); }
+    } catch (error) { }
     finally { setLoading(false); }
   };
 

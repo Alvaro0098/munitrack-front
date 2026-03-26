@@ -23,7 +23,6 @@ const OperatorList = () => {
       const data = await GetOperators(); 
       setOperators(data); 
     } catch (error) {
-      console.error("Error cargando operadores:", error);
     }
   };
 

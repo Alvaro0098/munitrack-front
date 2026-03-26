@@ -18,8 +18,6 @@ const CitizenList = () => {
     try {
       const data = await GetCitizens();
       setCitizens(data);
-    } catch (error) {
-      console.error("Error cargando ciudadanos:", error);
     } finally {
       setLoading(false);
     }

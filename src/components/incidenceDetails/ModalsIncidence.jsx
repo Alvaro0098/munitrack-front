@@ -53,7 +53,6 @@ const ModalsIncidence = ({ show, mode, incidenceData, onClose, onConfirm }) => {
         const data = await GetAreas();
         setAreas(data);
       } catch (error) {
-        console.error("Error al cargar áreas:", error);
       }
     };
     if (show && mode !== "delete") fetchAreas();
@@ -95,7 +94,6 @@ const ModalsIncidence = ({ show, mode, incidenceData, onClose, onConfirm }) => {
   const handleConfirmIncidence = async (formDataValues) => {
     // En modo edit, validar que haya cambios reales
     if (mode === "edit" && !hasLocalChanges()) {
-      console.log("No hay cambios en la incidencia");
       onClose();
       return;
     }

@@ -20,8 +20,6 @@ const AreaList = () => {
     try {
       const data = await GetAreas(); 
       setAreas(data); 
-    } catch (error) {
-      console.error("Error cargando áreas:", error);
     } finally {
       setLoading(false);
     }

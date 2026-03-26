@@ -11,14 +11,8 @@ export const AuthProvider = ({ children }) => {
         const data = getUserData(); 
         if (data) {
             const rawRole = data.role ?? data["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-            console.log("Datos decodificados del token:", data); // Para que veas las keys reales
-            
 
-            // LOG 1: Ver qué llega del token
-            console.log("DEBUG - Claim de Rol Original:", rawRole);
-            console.log("DEBUG - Tipo de dato original:", typeof rawRole);
-
-            setUser({
+            setUser({{
                 role: rawRole, 
                 name: data.given_name
             });
@@ -35,8 +29,6 @@ export const AuthProvider = ({ children }) => {
         isAdmin: user?.role === 1,
         isSuperAdmin: user?.role === 2
     }), [user]);
-
-    console.log(user)
 
     if (loading) return null; 
 

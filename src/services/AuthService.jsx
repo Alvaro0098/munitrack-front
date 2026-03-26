@@ -65,7 +65,6 @@ export const getUserData = () => {
             role: positionId
         };
     } catch (e) {
-        console.error("Error decodificando el token", e);
         return null;
     }
 };

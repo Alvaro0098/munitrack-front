@@ -25,7 +25,6 @@ const DeletedIncidence = () => {
       const data = await GetDeletedIncidences();
       setIncidences(data);
     } catch (error) { 
-      console.error("Error cargando incidencias eliminadas:", error); 
     }
     finally { 
       setLoading(false); 

@@ -27,8 +27,6 @@ export const CreateIncidence = async (formData) => {
         AreaId: parseInt(formData.area)
     };
 
-    console.log(payload)
-
     const response = await fetch(`${API_URL}/api/Incidence`, {
         method: "POST",
         headers: {

@@ -112,7 +112,6 @@ const OperatorModals = ({ show, mode, operatorData, onClose, onConfirm, onError 
   const handleConfirmOperator = async (formDataValues) => {
     // En modo edit, validar que haya cambios reales
     if (mode === "edit" && !hasLocalChanges()) {
-      console.log("No hay cambios en el operador");
       onClose();
       return;
     }
