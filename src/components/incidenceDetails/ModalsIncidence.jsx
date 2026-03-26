@@ -114,7 +114,16 @@ const ModalsIncidence = ({ show, mode, incidenceData, onClose, onConfirm }) => {
           <div className="row">
             <div className="col-md-4 mb-3">
               <Form.Label className="fw-semibold">Fecha</Form.Label>
-              <Form.Control type="date" name="fecha" value={formData.fecha} onChange={handleChange} />
+              <Form.Control 
+                type="date" 
+                name="fecha" 
+                value={formData.fecha} 
+                onChange={handleChange}
+                isInvalid={!!errors.fecha}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.fecha}
+              </Form.Control.Feedback>
             </div>
             <div className="col-md-4 mb-3">
               <Form.Label className="fw-semibold">Tipo de Incidencia</Form.Label>
