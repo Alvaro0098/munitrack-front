@@ -11,7 +11,9 @@ const AreaList = () => {
   const [loading, setLoading] = useState(true);
   const [modalConfig, setModalConfig] = useState({ show: false, mode: null, data: null });
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const cargarDatos = async () => {
     setLoading(true);
@@ -55,7 +57,8 @@ const AreaList = () => {
       await cargarDatos();
       handleCloseModal();
     } catch (error) {
-      alert("Error: " + error.message);
+      setErrorMessage(error.message);
+      setShowErrorToast(true);
     }
   };
 
@@ -76,6 +79,21 @@ const AreaList = () => {
           </Toast.Header>
           <Toast.Body className="bg-light">
             {toastMessage}
+          </Toast.Body>
+        </Toast>
+        <Toast 
+          onClose={() => setShowErrorToast(false)} 
+          show={showErrorToast} 
+          delay={5000} 
+          autohide
+          className="border-0 shadow"
+        >
+          <Toast.Header closeButton className="bg-danger text-white border-0">
+            <i className="bi bi-exclamation-circle me-2"></i>
+            <strong className="me-auto">Error</strong>
+          </Toast.Header>
+          <Toast.Body className="bg-light text-danger">
+            {errorMessage}
           </Toast.Body>
         </Toast>
       </ToastContainer>
